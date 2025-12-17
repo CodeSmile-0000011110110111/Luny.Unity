@@ -15,13 +15,21 @@ namespace Luny.Unity
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 		private static void AutoInitialize()
 		{
-			// Force creation before first scene loads
 			var go = new GameObject(nameof(UnityLifecycleAdapter));
+			EnsureSingleInstance(go); // safety, in case of incorrect static field reset with "disabled domain reload"
+
 			_instance = go.AddComponent<UnityLifecycleAdapter>();
 			DontDestroyOnLoad(go);
 		}
 
 		private void Awake()
+		{
+			EnsureSingleInstance(gameObject);
+
+			_dispatcher = EngineLifecycleDispatcher.Instance;
+		}
+
+		private static void EnsureSingleInstance(GameObject currentObject)
 		{
 			if (_instance != null)
 			{
@@ -29,11 +37,9 @@ namespace Luny.Unity
 					nameof(UnityLifecycleAdapter),
 					_instance.gameObject.name,
 					_instance.GetInstanceID(),
-					gameObject.name,
-					GetInstanceID());
+					currentObject.name,
+					currentObject.GetInstanceID());
 			}
-
-			_dispatcher = EngineLifecycleDispatcher.Instance;
 		}
 
 		private void Update() => _dispatcher.OnUpdate(Time.deltaTime);
@@ -50,7 +56,7 @@ namespace Luny.Unity
 			// we should not get destroyed with an existing instance (indicates manual removal)
 			if (_instance != null)
 			{
-				Shutdown();
+				Shutdown(); // clear _instance anyway to avoid exiting with singleton reference with "disabled domain reload"
 				Throw.LifecycleAdapterPrematurelyRemovedException(nameof(UnityLifecycleAdapter));
 			}
 		}
