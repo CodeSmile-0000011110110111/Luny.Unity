@@ -27,6 +27,7 @@ namespace Luny.Unity
 		{
 			// Logging comes first, we don't want to miss anything
 			LunyLogger.SetLogger(new UnityLogger());
+			LunyLogger.LogInfo("Initializing...", typeof(UnityLifecycleAdapter));
 
 			var go = new GameObject(nameof(UnityLifecycleAdapter));
 			EnsureSingleInstance(go); // safety check, in case of incorrect static field reset with "disabled domain reload"
@@ -65,7 +66,7 @@ namespace Luny.Unity
 
 			try
 			{
-				LunyLogger.LogInfo("[UnityLifecycleAdapter] Shutting down...");
+				LunyLogger.LogInfo("Shutting down...", this);
 				_dispatcher?.OnShutdown();
 			}
 			catch (Exception ex)
@@ -74,7 +75,7 @@ namespace Luny.Unity
 			}
 			finally
 			{
-				LunyLogger.LogInfo("[UnityLifecycleAdapter] Shutdown complete.");
+				LunyLogger.LogInfo("Shutdown complete.", this);
 				LunyLogger.SetLogger(null);
 				_dispatcher = null;
 				_instance = null;
