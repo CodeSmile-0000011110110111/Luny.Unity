@@ -1,0 +1,16 @@
+{
+    "name": "Luny.Unity",
+    "rootNamespace": "Luny.Unity",
+    "references": [
+        "GUID:d8105533248dd994a834ff6858cf7898"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
