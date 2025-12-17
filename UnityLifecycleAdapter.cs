@@ -11,36 +11,34 @@ namespace Luny.Unity
 
 		private IEngineLifecycleDispatcher _dispatcher;
 
-		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-		private static void AutoInitialize()
-		{
-			LunyLog.SetLogger(new UnityLogger());
-
-			var go = new GameObject(nameof(UnityLifecycleAdapter));
-			EnsureSingleInstance(go); // safety, in case of incorrect static field reset with "disabled domain reload"
-			_instance = go.AddComponent<UnityLifecycleAdapter>();
-			DontDestroyOnLoad(go);
-		}
-
-		private static void EnsureSingleInstance(GameObject currentObject)
+		private static void EnsureSingleInstance(GameObject current)
 		{
 			if (_instance != null)
 			{
-				Throw.LifecycleAdapterSingletonDuplicationException(
-					nameof(UnityLifecycleAdapter),
-					_instance.gameObject.name,
-					_instance.GetInstanceID(),
-					currentObject.name,
-					currentObject.GetInstanceID());
+				Throw.LifecycleAdapterSingletonDuplicationException(nameof(UnityLifecycleAdapter), _instance.gameObject.name,
+					_instance.GetInstanceID(), current.name, current.GetInstanceID());
 			}
 		}
 
-		private void Awake()
-		{
-			EnsureSingleInstance(gameObject);
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+		private static void OnBeforeSceneLoad() => Initialize();
 
-			_dispatcher = EngineLifecycleDispatcher.Instance;
+		private static void Initialize()
+		{
+			// Logging comes first, we don't want to miss anything
+			LunyLogger.SetLogger(new UnityLogger());
+
+			var go = new GameObject(nameof(UnityLifecycleAdapter));
+			EnsureSingleInstance(go); // safety check, in case of incorrect static field reset with "disabled domain reload"
+			DontDestroyOnLoad(go);
+
+			// Note: Awake runs before _instance is assigned
+			_instance = go.AddComponent<UnityLifecycleAdapter>();
+			_instance._dispatcher = EngineLifecycleDispatcher.Instance;
 		}
+
+		// Note: _instance is null during Awake - this is intentional!
+		private void Awake() => EnsureSingleInstance(gameObject);
 
 		private void Update() => _dispatcher.OnUpdate(Time.deltaTime);
 
@@ -67,17 +65,17 @@ namespace Luny.Unity
 
 			try
 			{
-				LunyLog.Info("[UnityLifecycleAdapter] Shutting down...");
+				LunyLogger.LogInfo("[UnityLifecycleAdapter] Shutting down...");
 				_dispatcher?.OnShutdown();
 			}
 			catch (Exception ex)
 			{
-				LunyLog.Exception(ex);
+				LunyLogger.LogException(ex);
 			}
 			finally
 			{
-				LunyLog.Info("[UnityLifecycleAdapter] Shutdown complete.");
-				LunyLog.SetLogger(null);
+				LunyLogger.LogInfo("[UnityLifecycleAdapter] Shutdown complete.");
+				LunyLogger.SetLogger(null);
 				_dispatcher = null;
 				_instance = null;
 			}
