@@ -5,7 +5,7 @@ namespace Luny.Unity
 {
 	// TODO: consider creating a companion behaviour that runs last (for structural changes)
 	[DefaultExecutionOrder(Int32.MinValue)]
-	internal sealed class UnityLifecycleAdapter : MonoBehaviour
+	internal sealed partial class UnityLifecycleAdapter : MonoBehaviour
 	{
 		private static UnityLifecycleAdapter _instance;
 
@@ -40,12 +40,9 @@ namespace Luny.Unity
 
 		// Note: _instance is null during Awake - this is intentional!
 		private void Awake() => EnsureSingleInstance(gameObject);
-
-		private void Update() => _dispatcher.OnUpdate(Time.deltaTime);
-
-		private void LateUpdate() => _dispatcher.OnLateUpdate(Time.deltaTime);
-
 		private void FixedUpdate() => _dispatcher.OnFixedStep(Time.fixedDeltaTime);
+		private void Update() => _dispatcher.OnUpdate(Time.deltaTime);
+		private void LateUpdate() => _dispatcher.OnLateUpdate(Time.deltaTime);
 
 		private void OnDestroy()
 		{
