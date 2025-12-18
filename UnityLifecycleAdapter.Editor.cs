@@ -17,21 +17,25 @@ namespace Luny.Unity
 
 		private static void OnPlayModeStateChanged(PlayModeStateChange state)
 		{
-			Debug.Log($"state: {state}, playing: {EditorApplication.isPlaying}, {Application.isPlaying}, willChange: {EditorApplication.isPlayingOrWillChangePlaymode}");
 			if (state == PlayModeStateChange.EnteredEditMode)
-				CatchAllSingletonInstanceReset();
+				CheckStaticFieldReferencesAreNull();
 		}
 
-		// safety reset for "disabled domain reload"
-		private static void CatchAllSingletonInstanceReset()
+		private static void CheckStaticFieldReferencesAreNull()
 		{
+			// precautionary static field checks for exiting playmode with "disabled domain reload"
+
 			if (_instance != null)
 			{
 				Debug.LogError($"{nameof(UnityLifecycleAdapter)} _instance not null when exiting playmode - investigate!");
 				_instance = null;
 			}
-			LunyLogger.SetLogger(null);
-			Debug.Log($"{nameof(UnityLifecycleAdapter)} exiting playmode complete");
+
+			if (LunyLogger.Logger is UnityLogger)
+			{
+				Debug.LogError($"{nameof(LunyLogger)}.Logger still assigned when exiting playmode - investigate!");
+				LunyLogger.Logger = null;
+			}
 		}
 #endif
 	}

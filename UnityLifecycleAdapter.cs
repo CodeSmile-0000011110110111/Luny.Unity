@@ -26,7 +26,7 @@ namespace Luny.Unity
 		private static void Initialize()
 		{
 			// Logging comes first, we don't want to miss anything
-			LunyLogger.SetLogger(new UnityLogger());
+			LunyLogger.Logger = new UnityLogger();
 			LunyLogger.LogInfo("Initializing...", typeof(UnityLifecycleAdapter));
 
 			var go = new GameObject(nameof(UnityLifecycleAdapter));
@@ -46,8 +46,6 @@ namespace Luny.Unity
 
 		private void OnDestroy()
 		{
-			Debug.LogWarning($"{nameof(UnityLifecycleAdapter)} OnDestroy", this);
-
 			// we should not get destroyed with an existing instance (indicates manual removal)
 			if (_instance != null)
 			{
@@ -79,7 +77,7 @@ namespace Luny.Unity
 			finally
 			{
 				LunyLogger.LogInfo("Shutdown complete.", this);
-				LunyLogger.SetLogger(null);
+				LunyLogger.Logger = null;
 				_lunyEngine = null;
 				_instance = null;
 			}
