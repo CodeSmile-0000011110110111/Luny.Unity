@@ -7,7 +7,7 @@ namespace Luny.Unity.Providers
 	/// <summary>
 	/// Unity implementation of application control provider.
 	/// </summary>
-	public sealed class UnityApplicationProvider : IApplicationProvider
+	public sealed class UnityApplicationServiceProvider : IApplicationServiceProvider
 	{
 		public void Quit(Int32 exitCode = 0)
 		{

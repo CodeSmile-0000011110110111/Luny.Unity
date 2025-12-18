@@ -7,7 +7,7 @@ namespace Luny.Unity.Providers
 	/// <summary>
 	/// Unity implementation of scene information provider.
 	/// </summary>
-	public sealed class UnitySceneProvider : ISceneProvider
+	public sealed class UnitySceneServiceProvider : ISceneServiceProvider
 	{
 		public String CurrentSceneName => SceneManager.GetActiveScene().name;
 	}

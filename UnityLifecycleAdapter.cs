@@ -15,7 +15,7 @@ namespace Luny.Unity
 		{
 			if (_instance != null)
 			{
-				Throw.LifecycleAdapterSingletonDuplicationException(nameof(UnityLifecycleAdapter), _instance.gameObject.name,
+				LunyThrow.LifecycleAdapterSingletonDuplicationException(nameof(UnityLifecycleAdapter), _instance.gameObject.name,
 					_instance.GetInstanceID(), current.name, current.GetInstanceID());
 			}
 		}
@@ -40,9 +40,9 @@ namespace Luny.Unity
 
 		// Note: _instance is null during Awake - this is intentional!
 		private void Awake() => EnsureSingleInstance(gameObject);
-		private void FixedUpdate() => _lunyEngine.OnFixedStep(Time.fixedDeltaTime);
-		private void Update() => _lunyEngine.OnUpdate(Time.deltaTime);
-		private void LateUpdate() => _lunyEngine.OnLateUpdate(Time.deltaTime);
+		private void FixedUpdate() => _lunyEngine?.OnFixedStep(Time.fixedDeltaTime);
+		private void Update() => _lunyEngine?.OnUpdate(Time.deltaTime);
+		private void LateUpdate() => _lunyEngine?.OnLateUpdate(Time.deltaTime);
 
 		private void OnDestroy()
 		{
@@ -50,7 +50,7 @@ namespace Luny.Unity
 			if (_instance != null)
 			{
 				Shutdown(); // clear _instance anyway to avoid exiting with singleton reference with "disabled domain reload"
-				Throw.LifecycleAdapterPrematurelyRemovedException(nameof(UnityLifecycleAdapter));
+				LunyThrow.LifecycleAdapterPrematurelyRemovedException(nameof(UnityLifecycleAdapter));
 			}
 
 			// Verification
