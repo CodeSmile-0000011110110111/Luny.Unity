@@ -6,19 +6,21 @@ using UnityEngine.TestTools;
 
 namespace Luny.Unity.Tests
 {
-	public class EngineLifecycleTests
+	public sealed class EngineLifecycleTests
 	{
 		public static Boolean DidCreateEngineLifecycleEventOrderMockInstance { get; set; }
 
 		[UnityTest]
 		public IEnumerator EngineLifecycleExpectedEventOrder()
 		{
+			// Mock lifecycle auto-instantiates and is already running (several frames actually) at this point
+
 			Assert.That(DidCreateEngineLifecycleEventOrderMockInstance, Is.True, $"{nameof(EngineLifecycleExpectedEventOrderMock)} was not instantiated");
 
 			yield return new WaitForEndOfFrame();
 
-			Assert.Pass(); // any assertions happen within the Mock class
-			DidCreateEngineLifecycleEventOrderMockInstance = false;
+			yield return null;
+			Assert.That(DidCreateEngineLifecycleEventOrderMockInstance, Is.False, $"{nameof(EngineLifecycleExpectedEventOrderMock)} was not shut down");
 		}
 	}
 
@@ -90,6 +92,7 @@ namespace Luny.Unity.Tests
 			Assert.That(_didRunShutdown, Is.False, $"{nameof(OnShutdown)} called more than once");
 
 			_didRunShutdown = true;
+			EngineLifecycleTests.DidCreateEngineLifecycleEventOrderMockInstance = false;
 		}
 	}
 }

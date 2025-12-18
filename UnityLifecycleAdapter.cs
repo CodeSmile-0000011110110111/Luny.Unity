@@ -46,12 +46,18 @@ namespace Luny.Unity
 
 		private void OnDestroy()
 		{
+			Debug.LogWarning($"{nameof(UnityLifecycleAdapter)} OnDestroy", this);
+
 			// we should not get destroyed with an existing instance (indicates manual removal)
 			if (_instance != null)
 			{
 				Shutdown(); // clear _instance anyway to avoid exiting with singleton reference with "disabled domain reload"
 				Throw.LifecycleAdapterPrematurelyRemovedException(nameof(UnityLifecycleAdapter));
 			}
+
+			// Verification
+			if (_instance != null)
+				throw new Exception($"{nameof(UnityLifecycleAdapter)} destroyed without running shutdown");
 		}
 
 		private void OnApplicationQuit() => Shutdown();
