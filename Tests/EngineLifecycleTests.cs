@@ -24,7 +24,7 @@ namespace Luny.Unity.Tests
 		}
 	}
 
-	public sealed class EngineLifecycleExpectedEventOrderMock : IEngineLifecycle
+	public sealed class EngineLifecycleExpectedEventOrderMock : IEngineLifecycleObserver
 	{
 		private Boolean _didRunStartup;
 		private Int32 _fixedStepRunCount;

@@ -9,7 +9,7 @@ namespace Luny.Unity
 	{
 		private static UnityLifecycleAdapter _instance;
 
-		private IEngineLifecycleDispatcher _dispatcher;
+		private ILunyEngine _lunyEngine;
 
 		private static void EnsureSingleInstance(GameObject current)
 		{
@@ -35,14 +35,14 @@ namespace Luny.Unity
 
 			// Note: Awake runs before _instance is assigned
 			_instance = go.AddComponent<UnityLifecycleAdapter>();
-			_instance._dispatcher = EngineLifecycleDispatcher.Instance;
+			_instance._lunyEngine = LunyEngine.Instance;
 		}
 
 		// Note: _instance is null during Awake - this is intentional!
 		private void Awake() => EnsureSingleInstance(gameObject);
-		private void FixedUpdate() => _dispatcher.OnFixedStep(Time.fixedDeltaTime);
-		private void Update() => _dispatcher.OnUpdate(Time.deltaTime);
-		private void LateUpdate() => _dispatcher.OnLateUpdate(Time.deltaTime);
+		private void FixedUpdate() => _lunyEngine.OnFixedStep(Time.fixedDeltaTime);
+		private void Update() => _lunyEngine.OnUpdate(Time.deltaTime);
+		private void LateUpdate() => _lunyEngine.OnLateUpdate(Time.deltaTime);
 
 		private void OnDestroy()
 		{
@@ -70,7 +70,7 @@ namespace Luny.Unity
 			try
 			{
 				LunyLogger.LogInfo("Shutting down...", this);
-				_dispatcher?.OnShutdown();
+				_lunyEngine?.OnShutdown();
 			}
 			catch (Exception ex)
 			{
@@ -80,7 +80,7 @@ namespace Luny.Unity
 			{
 				LunyLogger.LogInfo("Shutdown complete.", this);
 				LunyLogger.SetLogger(null);
-				_dispatcher = null;
+				_lunyEngine = null;
 				_instance = null;
 			}
 		}
