@@ -33,9 +33,10 @@ namespace Luny.Unity
 			EnsureSingleInstance(go); // safety check, in case of incorrect static field reset with "disabled domain reload"
 			DontDestroyOnLoad(go);
 
-			// Note: Awake runs before _instance is assigned
+			// CAUTION: Awake and OnEnable run within AddComponent, before _instance is assigned!
 			_instance = go.AddComponent<UnityLifecycleAdapter>();
 			_instance._lunyEngine = LunyEngine.Instance;
+			_instance._lunyEngine.OnStartup();
 		}
 
 		// Note: _instance is null during Awake - this is intentional!
