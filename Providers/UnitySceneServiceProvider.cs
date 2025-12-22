@@ -1,9 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Luny.Providers;
 using Luny.Proxies;
 using Luny.Unity.Proxies;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -19,9 +18,6 @@ namespace Luny.Unity.Providers
 		public IReadOnlyList<LunyObject> GetAllObjects()
 		{
 			var scene = SceneManager.GetActiveScene();
-			if (!scene.isLoaded)
-				return Array.Empty<LunyObject>();
-
 			var rootGameObjects = scene.GetRootGameObjects();
 			var allObjects = new List<LunyObject>();
 
@@ -31,13 +27,11 @@ namespace Luny.Unity.Providers
 				allObjects.Add(new UnityObject(rootObj));
 
 				// Add all children recursively
-				var transforms = rootObj.GetComponentsInChildren<Transform>(includeInactive: true);
+				var transforms = rootObj.GetComponentsInChildren<Transform>(true);
 				foreach (var transform in transforms)
 				{
 					if (transform.gameObject != rootObj) // Skip root (already added)
-					{
 						allObjects.Add(new UnityObject(transform.gameObject));
-					}
 				}
 			}
 
@@ -61,7 +55,7 @@ namespace Luny.Unity.Providers
 					return new UnityObject(rootObj);
 
 				// Search children
-				var transforms = rootObj.GetComponentsInChildren<Transform>(includeInactive: true);
+				var transforms = rootObj.GetComponentsInChildren<Transform>(true);
 				foreach (var transform in transforms)
 				{
 					if (transform.gameObject.name == name)

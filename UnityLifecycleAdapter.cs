@@ -4,6 +4,7 @@ using UnityEngine;
 namespace Luny.Unity
 {
 	// TODO: consider creating a companion behaviour that runs last (for structural changes)
+
 	[DefaultExecutionOrder(Int32.MinValue)]
 	internal sealed partial class UnityLifecycleAdapter : MonoBehaviour
 	{
@@ -20,7 +21,7 @@ namespace Luny.Unity
 			}
 		}
 
-		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
 		private static void OnBeforeSceneLoad() => Initialize();
 
 		private static void Initialize()

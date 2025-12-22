@@ -4,7 +4,7 @@
 using System;
 using UnityEditor;
 
-namespace Luny.UnityEditor
+namespace LunyEditor
 {
 	/// <summary>
 	///     If Preferences => Asset Pipeline => Auto Refresh is disabled, will call AssetDatabase.Refresh() before
