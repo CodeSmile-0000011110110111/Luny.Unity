@@ -1,7 +1,7 @@
-﻿using Luny.Exceptions;
+﻿using Luny.Diagnostics;
+using Luny.Exceptions;
 using Luny.Interfaces;
-using Luny.Proxies;
-using Luny.Unity.Proxies;
+using Luny.Unity.Diagnostics;
 using System;
 using UnityEngine;
 
@@ -15,15 +15,6 @@ namespace Luny.Unity
 		private static UnityLifecycleAdapter _instance;
 
 		private ILunyEngine _lunyEngine;
-
-		private static void EnsureSingleInstance(GameObject current)
-		{
-			if (_instance != null)
-			{
-				LunyThrow.LifecycleAdapterSingletonDuplicationException(nameof(UnityLifecycleAdapter), _instance.gameObject.name,
-					_instance.GetInstanceID(), current.name, current.GetInstanceID());
-			}
-		}
 
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
 		private static void OnBeforeSceneLoad() => Initialize();
@@ -42,6 +33,15 @@ namespace Luny.Unity
 			_instance = go.AddComponent<UnityLifecycleAdapter>();
 			_instance._lunyEngine = LunyEngine.Instance;
 			_instance._lunyEngine.OnStartup();
+		}
+
+		private static void EnsureSingleInstance(GameObject current)
+		{
+			if (_instance != null)
+			{
+				LunyThrow.LifecycleAdapterSingletonDuplicationException(nameof(UnityLifecycleAdapter),
+					_instance.gameObject.name, _instance.GetInstanceID(), current.name, current.GetInstanceID());
+			}
 		}
 
 		// Note: _instance is null during Awake - this is intentional!

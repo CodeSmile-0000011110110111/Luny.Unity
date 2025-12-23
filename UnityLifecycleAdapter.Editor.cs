@@ -1,4 +1,6 @@
+using Luny.Diagnostics;
 using Luny.Proxies;
+using Luny.Unity.Diagnostics;
 using Luny.Unity.Proxies;
 using UnityEngine;
 #if UNITY_EDITOR
