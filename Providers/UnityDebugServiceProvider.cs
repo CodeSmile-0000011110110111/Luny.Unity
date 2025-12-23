@@ -13,7 +13,5 @@ namespace Luny.Unity.Providers
 		public void LogWarning(String message) => Debug.LogWarning(message);
 		public void LogError(String message) => Debug.LogError(message);
 		public void LogException(Exception exception) => Debug.LogException(exception);
-
-		public void PausePlayer() => Debug.Break();
 	}
 }
