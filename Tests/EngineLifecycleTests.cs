@@ -1,6 +1,6 @@
 namespace Luny.Unity.Tests
 {
-	public sealed class EngineLifecycleTests
+	internal sealed class EngineLifecycleTests
 	{
 		/*[UnityTest]
 		public IEnumerator EngineLifecycleExpectedEventOrder()

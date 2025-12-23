@@ -1,4 +1,4 @@
-using Luny.Providers;
+using Luny.Interfaces.Providers;
 using System;
 using UnityEngine;
 

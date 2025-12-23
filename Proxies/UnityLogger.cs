@@ -7,7 +7,7 @@ namespace Luny.Unity.Proxies
 	/// <summary>
     /// Unity-specific implementation of the Luny logger that forwards to UnityEngine.Debug.
     /// </summary>
-    internal sealed class UnityLogger : ILunyLogger
+    public sealed class UnityLogger : ILunyLogger
     {
         public void LogInfo(String message) => Debug.Log(message);
         public void LogWarning(String message) => Debug.LogWarning(message);
