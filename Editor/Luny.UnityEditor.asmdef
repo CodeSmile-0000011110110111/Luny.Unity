@@ -1,6 +1,6 @@
 {
-    "name": "LunyEditor",
-    "rootNamespace": "LunyEditor",
+    "name": "Luny.UnityEditor",
+    "rootNamespace": "Luny.UnityEditor",
     "references": [
         "GUID:d8105533248dd994a834ff6858cf7898",
         "GUID:04220f546f37c3844b2def871a4913e7"

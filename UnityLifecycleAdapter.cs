@@ -1,4 +1,8 @@
-﻿using System;
+﻿using Luny.Exceptions;
+using Luny.Interfaces;
+using Luny.Proxies;
+using Luny.Unity.Proxies;
+using System;
 using UnityEngine;
 
 namespace Luny.Unity
@@ -54,10 +58,6 @@ namespace Luny.Unity
 				Shutdown(); // clear _instance anyway to avoid exiting with singleton reference with "disabled domain reload"
 				LunyThrow.LifecycleAdapterPrematurelyRemovedException(nameof(UnityLifecycleAdapter));
 			}
-
-			// Verification
-			if (_instance != null)
-				throw new Exception($"{nameof(UnityLifecycleAdapter)} destroyed without running shutdown");
 		}
 
 		private void OnApplicationQuit() => Shutdown();

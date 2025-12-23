@@ -1,4 +1,4 @@
-using Luny.Reflection;
+using Luny.Registries;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,7 +8,7 @@ using UnityEditor.Build.Reporting;
 using UnityEditor.UnityLinker;
 using UnityEngine;
 
-namespace LunyEditor
+namespace Luny.UnityEditor.Linking
 {
 	public abstract class LunyLinkerProcessor : IUnityLinkerProcessor
 	{

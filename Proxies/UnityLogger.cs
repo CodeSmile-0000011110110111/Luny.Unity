@@ -1,10 +1,10 @@
+using Luny.Interfaces;
 using System;
+using UnityEngine;
 
-namespace Luny.Unity
+namespace Luny.Unity.Proxies
 {
-    using UnityEngine;
-
-    /// <summary>
+	/// <summary>
     /// Unity-specific implementation of the Luny logger that forwards to UnityEngine.Debug.
     /// </summary>
     internal sealed class UnityLogger : ILunyLogger

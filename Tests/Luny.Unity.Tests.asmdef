@@ -1,6 +1,6 @@
 {
-    "name": "Tests",
-    "rootNamespace": "Luny.Unity.Tests",
+    "name": "Luny.Unity.Tests",
+    "rootNamespace": "Luny.Unity",
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
