@@ -1,4 +1,6 @@
+using Luny.Reflection;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using UnityEditor.Build;
@@ -12,9 +14,29 @@ namespace LunyEditor
 	{
 		public Int32 callbackOrder => Int32.MaxValue;
 
+		protected static List<PreserveDetails> PreserveAllDerivedClasses<T>()
+		{
+			var details = new List<PreserveDetails>();
+
+			var preserveScripts = new Dictionary<String, List<String>>();
+			foreach (var scriptType in TypeDiscovery.FindAll<T>())
+			{
+				var assemblyName = scriptType.Assembly.GetName().Name;
+				if (preserveScripts.ContainsKey(assemblyName) == false)
+					preserveScripts[assemblyName] = new List<String>();
+
+				preserveScripts[assemblyName].Add(scriptType.FullName);
+			}
+
+			foreach (var pair in preserveScripts)
+				details.Add(new PreserveDetails { Assembly = pair.Key, Types = pair.Value.ToArray() });
+
+			return details;
+		}
+
 		public String GenerateAdditionalLinkXmlFile(BuildReport report, UnityLinkerBuildPipelineData data)
 		{
-			var path = $"{Application.dataPath}/../Library/{GetLinkFilename()}_{nameof(LunyLinkerProcessor)}_link.xml";
+			var path = $"{Application.dataPath}/../Library/{GetAssemblyName()}_{nameof(LunyLinkerProcessor)}_link.xml";
 
 			var details = GetPreserveDetails();
 			if (details?.Length > 0)
@@ -44,7 +66,8 @@ namespace LunyEditor
 				}
 				catch (Exception e)
 				{
-					Debug.LogException(e);
+					Debug.LogError($"{nameof(LunyLinkerProcessor)} failed to write linker config: {path}");
+					throw;
 				}
 			}
 
@@ -52,7 +75,7 @@ namespace LunyEditor
 		}
 
 		public abstract PreserveDetails[] GetPreserveDetails();
-		public abstract String GetLinkFilename();
+		public abstract String GetAssemblyName();
 
 		public struct PreserveDetails
 		{
