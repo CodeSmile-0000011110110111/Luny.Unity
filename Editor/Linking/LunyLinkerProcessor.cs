@@ -66,7 +66,7 @@ namespace Luny.UnityEditor.Linking
 				}
 				catch (Exception e)
 				{
-					Debug.LogError($"{nameof(LunyLinkerProcessor)} failed to write linker config: {path}");
+					Debug.LogError($"{nameof(LunyLinkerProcessor)} failed to write linker config: {path}\n{e}");
 					throw;
 				}
 			}
