@@ -9,7 +9,7 @@ namespace Luny.UnityEditor.Linking
 		public override PreserveDetails[] GetPreserveDetails()
 		{
 			// Engine services are discovered through reflection
-			var details = PreserveAllDerivedClasses<IEngineServiceProvider>();
+			var details = PreserveAllDerivedClasses<IEngineService>();
 
 			details.Add(new PreserveDetails
 			{

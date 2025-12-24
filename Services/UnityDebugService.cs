@@ -1,13 +1,13 @@
-﻿using Luny.Interfaces.Providers;
+﻿using Luny.Services;
 using System;
 using UnityEngine;
 
-namespace Luny.Unity.Providers
+namespace Luny.Unity.Services
 {
 	/// <summary>
-	/// Unity implementation of Debug provider.
+	/// Unity implementation of Debug.
 	/// </summary>
-	public sealed class UnityDebugServiceProvider : IDebugServiceProvider
+	public sealed class UnityDebugService : IDebugService
 	{
 		public void LogInfo(String message) => Debug.Log(message);
 		public void LogWarning(String message) => Debug.LogWarning(message);

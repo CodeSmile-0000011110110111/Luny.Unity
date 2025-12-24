@@ -1,14 +1,14 @@
-using Luny.Interfaces.Providers;
+using Luny.Services;
 using System;
 using UnityEngine;
 
-namespace Luny.Unity.Providers
+namespace Luny.Unity.Services
 {
 	/// <summary>
-	/// Unity implementation of time service provider.
+	/// Unity implementation of time service.
 	/// Uses Unity's Time.frameCount and Time.realtimeSinceStartupAsDouble for cross-platform consistency.
 	/// </summary>
-	public sealed class UnityTimeServiceProvider : ITimeServiceProvider
+	public sealed class UnityTimeService : ITimeService
 	{
 		public Int64 FrameCount => Time.frameCount;
 

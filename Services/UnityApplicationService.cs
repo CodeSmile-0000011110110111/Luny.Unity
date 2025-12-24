@@ -1,13 +1,13 @@
-using Luny.Interfaces.Providers;
+using Luny.Services;
 using System;
 using UnityEngine;
 
-namespace Luny.Unity.Providers
+namespace Luny.Unity.Services
 {
 	/// <summary>
-	/// Unity implementation of application control provider.
+	/// Unity implementation of application control.
 	/// </summary>
-	public sealed partial class UnityApplicationServiceProvider : IApplicationServiceProvider
+	public sealed partial class UnityApplicationService : IApplicationService
 	{
 		public Boolean IsEditor => Application.isEditor;
 

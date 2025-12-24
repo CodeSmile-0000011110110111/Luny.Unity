@@ -1,9 +1,9 @@
 ﻿using System.Diagnostics;
 using UnityEditor;
 
-namespace Luny.Unity.Providers
+namespace Luny.Unity.Services
 {
-	public sealed partial class UnityApplicationServiceProvider
+	public sealed partial class UnityApplicationService
 	{
 		[Conditional("UNITY_EDITOR")]
 		private void ExitPlayModeWhenInEditor()

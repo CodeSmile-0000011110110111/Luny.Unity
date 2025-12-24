@@ -1,17 +1,17 @@
-using Luny.Interfaces.Providers;
 using Luny.Proxies;
+using Luny.Services;
 using Luny.Unity.Proxies;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Luny.Unity.Providers
+namespace Luny.Unity.Services
 {
 	/// <summary>
-	/// Unity implementation of scene information provider.
+	/// Unity implementation of scene information.
 	/// </summary>
-	public sealed class UnitySceneServiceProvider : ISceneServiceProvider
+	public sealed class UnitySceneService : ISceneService
 	{
 		public String CurrentSceneName => SceneManager.GetActiveScene().name;
 
