@@ -12,13 +12,13 @@ namespace Luny.Unity.Proxies
 	{
 		private readonly GameObject _gameObject;
 		private readonly String _name;
-		private readonly EntityId _nativeId;
+		private readonly NativeID _nativeID;
 
 		/// <summary>
 		/// Gets the wrapped Unity GameObject.
 		/// </summary>
 		public GameObject GameObject => _gameObject;
-		public override Int64 NativeId => _nativeId;
+		public override NativeID NativeID => _nativeID;
 		public override String Name => _gameObject != null ? _gameObject.name : $"<null> ({_name})";
 		public override Boolean IsValid => _gameObject != null;
 		public override Boolean Enabled
@@ -36,7 +36,7 @@ namespace Luny.Unity.Proxies
 
 			// stored for reference in case object reference unexpectedly becomes null or "missing"
 			_name = gameObject.name;
-			_nativeId = gameObject.GetEntityId();
+			_nativeID = new NativeID(gameObject.GetEntityId());
 		}
 
 		public override Object GetNativeObject() => _gameObject;
