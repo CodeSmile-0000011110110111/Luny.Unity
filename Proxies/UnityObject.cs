@@ -1,7 +1,7 @@
 using Luny.Proxies;
 using System;
 using UnityEngine;
-using SystemObject = System.Object;
+using Object = System.Object;
 
 namespace Luny.Unity.Proxies
 {
@@ -11,17 +11,34 @@ namespace Luny.Unity.Proxies
 	public sealed class UnityObject : LunyObject
 	{
 		private readonly GameObject _gameObject;
-
-		public override String Name => _gameObject != null ? _gameObject.name : "<null>";
-		public override Boolean IsValid => _gameObject != null;
+		private readonly String _name;
+		private readonly EntityId _nativeId;
 
 		/// <summary>
 		/// Gets the wrapped Unity GameObject.
 		/// </summary>
 		public GameObject GameObject => _gameObject;
+		public override Int64 NativeId => _nativeId;
+		public override String Name => _gameObject != null ? _gameObject.name : $"<null> ({_name})";
+		public override Boolean IsValid => _gameObject != null;
+		public override Boolean Enabled
+		{
+			get => _gameObject != null && _gameObject.activeSelf;
+			set => _gameObject.SetActive(value);
+		}
 
-		public UnityObject(GameObject gameObject) => _gameObject = gameObject;
+		public UnityObject(GameObject gameObject)
+		{
+			if (gameObject == null)
+				throw new ArgumentNullException(nameof(gameObject), $"{nameof(UnityObject)} GameObject reference must not be null.");
 
-		public override SystemObject GetNativeObject() => _gameObject;
+			_gameObject = gameObject;
+
+			// stored for reference in case object reference unexpectedly becomes null or "missing"
+			_name = gameObject.name;
+			_nativeId = gameObject.GetEntityId();
+		}
+
+		public override Object GetNativeObject() => _gameObject;
 	}
 }
