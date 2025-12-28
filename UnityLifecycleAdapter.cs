@@ -16,8 +16,20 @@ namespace Luny.Unity
 
 		private ILunyEngine _lunyEngine;
 
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+		private static void OnBeforeSceneLoad()
+		{
+			Debug.LogWarning("OnBeforeSceneLoad");
+			Initialize();
+		}
+
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-		private static void OnBeforeSceneLoad() => Initialize();
+		private static void OnAfterSceneLoad()
+		{
+			Debug.LogWarning("OnAfterSceneLoad");
+			// deferred until after scene load to ensure all objects have been loaded
+			_instance._lunyEngine.OnStartup();
+		}
 
 		private static void Initialize()
 		{
@@ -31,8 +43,9 @@ namespace Luny.Unity
 
 			// CAUTION: Awake and OnEnable run within AddComponent, before _instance is assigned!
 			_instance = go.AddComponent<UnityLifecycleAdapter>();
+
+			// instantiates LunyEngine by "getting" it
 			_instance._lunyEngine = LunyEngine.Instance;
-			_instance._lunyEngine.OnStartup();
 		}
 
 		private static void EnsureSingleInstance(GameObject current)
