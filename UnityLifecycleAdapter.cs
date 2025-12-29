@@ -16,19 +16,12 @@ namespace Luny.Unity
 		private ILunyEngine _lunyEngine;
 
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-		private static void OnBeforeSceneLoad()
-		{
-			Debug.LogWarning("OnBeforeSceneLoad");
-			Initialize();
-		}
+		private static void OnBeforeSceneLoad() => Initialize();
 
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-		private static void OnAfterSceneLoad()
-		{
-			Debug.LogWarning("OnAfterSceneLoad");
+		private static void OnAfterSceneLoad() =>
 			// deferred until after scene load to ensure all objects have been loaded
 			_instance._lunyEngine.OnStartup();
-		}
 
 		private static void Initialize()
 		{
