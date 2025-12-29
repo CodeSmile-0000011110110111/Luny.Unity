@@ -15,11 +15,11 @@ namespace Luny.Unity.Services
 	{
 		public String CurrentSceneName => SceneManager.GetActiveScene().name;
 
-		public IReadOnlyList<LunyObject> GetAllObjects()
+		public IReadOnlyList<ILunyObject> GetAllObjects()
 		{
 			var scene = SceneManager.GetActiveScene();
 			var rootGameObjects = scene.GetRootGameObjects();
-			var allObjects = new List<LunyObject>();
+			var allObjects = new List<ILunyObject>();
 
 			foreach (var rootObj in rootGameObjects)
 			{
@@ -38,7 +38,7 @@ namespace Luny.Unity.Services
 			return allObjects;
 		}
 
-		public LunyObject FindObjectByName(String name)
+		public ILunyObject FindObjectByName(String name)
 		{
 			if (String.IsNullOrEmpty(name))
 				return null;
