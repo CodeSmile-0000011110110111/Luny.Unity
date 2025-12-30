@@ -13,6 +13,7 @@ namespace Luny.Unity.Proxies
 		private readonly GameObject _gameObject;
 		private readonly Int32 _nativeID;
 		private String _name;
+		private Boolean _isValid = true;
 
 		/// <summary>
 		/// Gets the wrapped Unity GameObject.
@@ -28,14 +29,18 @@ namespace Luny.Unity.Proxies
 					_gameObject.name = _name = value;
 			}
 		}
-		public override Boolean IsValid => _gameObject != null;
+		public override Boolean IsValid => _isValid && _gameObject != null;
 		public override Boolean Enabled
 		{
 			get => IsValid && _gameObject.activeSelf;
 			set
 			{
-				if (IsValid)
-					_gameObject.SetActive(value);
+				if (!IsValid || _gameObject.activeSelf == value)
+					return;
+
+				_gameObject.SetActive(value);
+				if (value) OnEnable?.Invoke();
+				else OnDisable?.Invoke();
 			}
 		}
 
@@ -49,6 +54,25 @@ namespace Luny.Unity.Proxies
 			// stored for reference in case object reference unexpectedly becomes null or "missing"
 			_nativeID = gameObject.GetEntityId();
 			_name = gameObject.name;
+		}
+
+		public override void Destroy()
+		{
+			if (!IsValid)
+				return;
+
+			Enabled = false; // Disable first (triggers OnDisable via OnEnabledChanged hook)
+			OnDestroy?.Invoke(); // Then trigger OnDestroy events
+			_isValid = false; // Mark as destroyed (native destruction happens later)
+		}
+
+		public override void DestroyNativeObject()
+		{
+			if (_isValid && _gameObject != null)
+				throw new InvalidOperationException(
+					$"{nameof(UnityObject)} must not call {nameof(DestroyNativeObject)} directly (object still valid): {this}");
+
+			UnityEngine.Object.Destroy(_gameObject);
 		}
 
 		public override Object GetNativeObject() => _gameObject;
