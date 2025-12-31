@@ -38,6 +38,8 @@ namespace Luny.Unity
 
 			// instantiates LunyEngine by "getting" it
 			_instance._lunyEngine = LunyEngine.Instance;
+
+			LunyLogger.LogInfo("Initialization complete.", typeof(UnityLifecycleAdapter));
 		}
 
 		private static void EnsureSingleInstance(GameObject current)
@@ -57,15 +59,29 @@ namespace Luny.Unity
 
 		private void OnDestroy()
 		{
+			LunyLogger.LogInfo($"{nameof(OnDestroy)} running...", this);
+
 			// we should not get destroyed with an existing instance (indicates manual removal)
 			if (_instance != null)
 			{
 				Shutdown(); // clear _instance anyway to avoid exiting with singleton reference with "disabled domain reload"
 				LunyThrow.LifecycleAdapterPrematurelyRemovedException(nameof(UnityLifecycleAdapter));
 			}
+
+			CollectGarbage();
+			LunyLogger.LogInfo($"{nameof(OnDestroy)} complete.", this);
 		}
 
-		private void OnApplicationQuit() => Shutdown();
+		private void OnApplicationQuit()
+		{
+			LunyLogger.LogInfo($"{nameof(OnApplicationQuit)} running...", this);
+			Shutdown();
+			LunyLogger.LogInfo($"{nameof(OnApplicationQuit)} complete.", this);
+		}
+
+		private void CollectGarbage() => GC.Collect(0, GCCollectionMode.Forced, true);
+
+		~UnityLifecycleAdapter() => Debug.Log($"[{nameof(UnityLifecycleAdapter)}] finalized {GetHashCode()}");
 
 		private void Shutdown()
 		{
@@ -74,7 +90,7 @@ namespace Luny.Unity
 
 			try
 			{
-				LunyLogger.LogInfo("Shutting down...", this);
+				LunyLogger.LogInfo("Shutdown...", this);
 				_lunyEngine?.OnShutdown();
 			}
 			catch (Exception ex)
