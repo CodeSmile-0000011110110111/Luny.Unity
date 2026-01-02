@@ -48,7 +48,7 @@ namespace Luny.Unity
 		{
 			if (s_Instance != null)
 			{
-				LunyThrow.LifecycleAdapterSingletonDuplicationException(nameof(LunyEngineUnityAdapter),
+				LunyThrow.EngineAdapterSingletonDuplicationException(nameof(LunyEngineUnityAdapter),
 					s_Instance.gameObject.name, s_Instance.GetInstanceID(), current.name, current.GetInstanceID());
 			}
 		}
@@ -67,7 +67,7 @@ namespace Luny.Unity
 			if (s_Instance != null)
 			{
 				Shutdown(); // clear _instance anyway to avoid exiting with singleton reference with "disabled domain reload"
-				LunyThrow.LifecycleAdapterPrematurelyRemovedException(nameof(LunyEngineUnityAdapter));
+				LunyThrow.EngineAdapterPrematurelyRemovedException(nameof(LunyEngineUnityAdapter));
 			}
 
 			CollectGarbage();
