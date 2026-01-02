@@ -27,10 +27,10 @@ namespace Luny.Unity
 
 		private static void EnsureStaticFieldsAreNull()
 		{
-			if (_instance != null)
+			if (s_Instance != null)
 			{
 				Debug.LogError($"{nameof(LunyEngineUnityAdapter)} _instance not null when exiting playmode!");
-				_instance = null;
+				s_Instance = null;
 			}
 
 			if (LunyLogger.Logger is UnityLogger)

@@ -11,8 +11,10 @@ namespace Luny.Unity
 	[DefaultExecutionOrder(Int32.MinValue)]
 	internal sealed partial class LunyEngineUnityAdapter : MonoBehaviour
 	{
-		private static LunyEngineUnityAdapter _instance;
+		// intentionally remains private - user code must use LunyEngine.Instance!
+		private static LunyEngineUnityAdapter s_Instance;
 
+		// hold on to LunyEngine reference
 		private ILunyEngine _lunyEngine;
 
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -21,7 +23,7 @@ namespace Luny.Unity
 		// OnStartup deliberately deferred to AfterSceneLoad
 		// Problem: in builds during BeforeSceneLoad the SceneManager's root objects list is empty (unlike in editor)
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-		private static void OnAfterSceneLoad() => _instance._lunyEngine.OnStartup();
+		private static void OnAfterSceneLoad() => s_Instance._lunyEngine.OnStartup();
 
 		private static void Initialize()
 		{
@@ -34,20 +36,20 @@ namespace Luny.Unity
 			DontDestroyOnLoad(go);
 
 			// CAUTION: Awake and OnEnable run within AddComponent, before _instance is assigned!
-			_instance = go.AddComponent<LunyEngineUnityAdapter>();
+			s_Instance = go.AddComponent<LunyEngineUnityAdapter>();
 
 			// instantiates LunyEngine by "getting" it
-			_instance._lunyEngine = LunyEngine.Instance;
+			s_Instance._lunyEngine = LunyEngine.Instance;
 
 			LunyLogger.LogInfo("Initialization complete.", typeof(LunyEngineUnityAdapter));
 		}
 
 		private static void EnsureSingleInstance(GameObject current)
 		{
-			if (_instance != null)
+			if (s_Instance != null)
 			{
 				LunyThrow.LifecycleAdapterSingletonDuplicationException(nameof(LunyEngineUnityAdapter),
-					_instance.gameObject.name, _instance.GetInstanceID(), current.name, current.GetInstanceID());
+					s_Instance.gameObject.name, s_Instance.GetInstanceID(), current.name, current.GetInstanceID());
 			}
 		}
 
@@ -62,7 +64,7 @@ namespace Luny.Unity
 			LunyLogger.LogInfo($"{nameof(OnDestroy)} running...", this);
 
 			// we should not get destroyed with an existing instance (indicates manual removal)
-			if (_instance != null)
+			if (s_Instance != null)
 			{
 				Shutdown(); // clear _instance anyway to avoid exiting with singleton reference with "disabled domain reload"
 				LunyThrow.LifecycleAdapterPrematurelyRemovedException(nameof(LunyEngineUnityAdapter));
@@ -81,11 +83,11 @@ namespace Luny.Unity
 
 		private void CollectGarbage() => GC.Collect(0, GCCollectionMode.Forced, true);
 
-		~LunyEngineUnityAdapter() => Debug.Log($"[{nameof(LunyEngineUnityAdapter)}] finalized {GetHashCode()}");
+		~LunyEngineUnityAdapter() => LunyLogger.LogInfo($"[{nameof(LunyEngineUnityAdapter)}] finalized {GetHashCode()}");
 
 		private void Shutdown()
 		{
-			if (_instance == null)
+			if (s_Instance == null)
 				return;
 
 			try
@@ -101,8 +103,9 @@ namespace Luny.Unity
 			{
 				LunyLogger.LogInfo("Shutdown complete.", this);
 				LunyLogger.Logger = null;
+
 				_lunyEngine = null;
-				_instance = null;
+				s_Instance = null;
 			}
 		}
 	}
