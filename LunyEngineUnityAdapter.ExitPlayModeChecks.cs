@@ -22,7 +22,10 @@ namespace Luny.Unity
 		private static void OnPlayModeStateChanged(PlayModeStateChange state)
 		{
 			if (state == PlayModeStateChange.EnteredEditMode)
+			{
 				EnsureStaticFieldsAreNull();
+				LunyEngine.ResetDisposedFlag_UnityEditorOnly();
+			}
 		}
 
 		private static void EnsureStaticFieldsAreNull()

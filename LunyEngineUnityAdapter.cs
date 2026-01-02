@@ -23,7 +23,11 @@ namespace Luny.Unity
 		// OnStartup deliberately deferred to AfterSceneLoad
 		// Problem: in builds during BeforeSceneLoad the SceneManager's root objects list is empty (unlike in editor)
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-		private static void OnAfterSceneLoad() => s_Instance._lunyEngine.OnStartup();
+		private static void OnAfterSceneLoad()
+		{
+			LunyLogger.LogInfo(nameof(OnAfterSceneLoad), typeof(LunyEngineUnityAdapter));
+			s_Instance._lunyEngine.OnStartup();
+		}
 
 		private static void Initialize()
 		{

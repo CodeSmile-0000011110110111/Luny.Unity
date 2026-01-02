@@ -1,3 +1,4 @@
+using Luny.Diagnostics;
 using Luny.Exceptions;
 using Luny.Proxies;
 using System;
@@ -11,7 +12,7 @@ namespace Luny.Unity.Proxies
 	/// </summary>
 	public sealed class UnityObject : LunyObject
 	{
-		private readonly GameObject _gameObject;
+		private GameObject _gameObject;
 		private readonly Int32 _nativeID;
 		private String _name;
 		private Boolean _isDestroyed;
@@ -54,18 +55,21 @@ namespace Luny.Unity.Proxies
 		public UnityObject(GameObject gameObject)
 		{
 			if (gameObject == null)
-				throw new ArgumentNullException(nameof(gameObject), $"{nameof(UnityObject)} GameObject reference must not be null.");
+				throw new ArgumentNullException(nameof(gameObject), $"{nameof(UnityObject)} {nameof(GameObject)} reference must not be null.");
 
 			_gameObject = gameObject;
 
 			// stored for reference in case object reference unexpectedly becomes null or "missing"
 			_nativeID = gameObject.GetEntityId();
 			_name = gameObject.name;
+
+			// set initial state
 			_isEnabled = gameObject.activeInHierarchy;
 		}
 
 		public override void Destroy()
 		{
+			LunyLogger.LogInfo($"{nameof(UnityObject)}.{nameof(Destroy)}() => {ToString()}", this);
 			if (!IsValid)
 				return;
 
@@ -76,10 +80,12 @@ namespace Luny.Unity.Proxies
 
 		public override void DestroyNativeObject()
 		{
-			if (!_isDestroyed && _gameObject != null)
+			LunyLogger.LogInfo($"{nameof(UnityObject)}.{nameof(DestroyNativeObject)}() => {_name} ({_nativeID})", this);
+			if (IsValid)
 				throw new LunyLifecycleException($"{nameof(DestroyNativeObject)}() called without calling {nameof(Destroy)}() first: {this}");
 
 			UnityEngine.Object.Destroy(_gameObject);
+			_gameObject = null;
 		}
 
 		public override SystemObject GetNativeObject() => _gameObject;
