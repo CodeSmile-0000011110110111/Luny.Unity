@@ -1,7 +1,5 @@
 using Luny.Diagnostics;
-using Luny.Proxies;
 using Luny.Unity.Diagnostics;
-using Luny.Unity.Proxies;
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -9,9 +7,11 @@ using UnityEditor;
 
 namespace Luny.Unity
 {
-	internal sealed partial class UnityLifecycleAdapter
+	internal sealed partial class LunyEngineUnityAdapter
 	{
 #if UNITY_EDITOR
+		// precautionary verification that static fields have been set to null
+		// this ensures proper "disabled domain reload" behaviour
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
 		private static void Init()
 		{
@@ -22,22 +22,20 @@ namespace Luny.Unity
 		private static void OnPlayModeStateChanged(PlayModeStateChange state)
 		{
 			if (state == PlayModeStateChange.EnteredEditMode)
-				CheckStaticFieldReferencesAreNull();
+				EnsureStaticFieldsAreNull();
 		}
 
-		private static void CheckStaticFieldReferencesAreNull()
+		private static void EnsureStaticFieldsAreNull()
 		{
-			// precautionary static field checks for exiting playmode with "disabled domain reload"
-
 			if (_instance != null)
 			{
-				Debug.LogError($"{nameof(UnityLifecycleAdapter)} _instance not null when exiting playmode - investigate!");
+				Debug.LogError($"{nameof(LunyEngineUnityAdapter)} _instance not null when exiting playmode!");
 				_instance = null;
 			}
 
 			if (LunyLogger.Logger is UnityLogger)
 			{
-				Debug.LogError($"{nameof(LunyLogger)}.Logger still assigned when exiting playmode - investigate!");
+				Debug.LogError($"{nameof(LunyLogger)} still references a {nameof(UnityLogger)} instance when exiting playmode!");
 				LunyLogger.Logger = null;
 			}
 		}

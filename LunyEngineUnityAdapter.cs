@@ -9,44 +9,44 @@ namespace Luny.Unity
 	// TODO: consider creating a companion behaviour that runs last (for structural changes)
 
 	[DefaultExecutionOrder(Int32.MinValue)]
-	internal sealed partial class UnityLifecycleAdapter : MonoBehaviour
+	internal sealed partial class LunyEngineUnityAdapter : MonoBehaviour
 	{
-		private static UnityLifecycleAdapter _instance;
+		private static LunyEngineUnityAdapter _instance;
 
 		private ILunyEngine _lunyEngine;
 
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 		private static void OnBeforeSceneLoad() => Initialize();
 
+		// OnStartup deliberately deferred to AfterSceneLoad
+		// Problem: in builds during BeforeSceneLoad the SceneManager's root objects list is empty (unlike in editor)
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-		private static void OnAfterSceneLoad() =>
-			// deferred until after scene load to ensure all objects have been loaded
-			_instance._lunyEngine.OnStartup();
+		private static void OnAfterSceneLoad() => _instance._lunyEngine.OnStartup();
 
 		private static void Initialize()
 		{
 			// Logging comes first, we don't want to miss anything
 			LunyLogger.Logger = new UnityLogger();
-			LunyLogger.LogInfo("Initializing...", typeof(UnityLifecycleAdapter));
+			LunyLogger.LogInfo("Initializing...", typeof(LunyEngineUnityAdapter));
 
-			var go = new GameObject(nameof(UnityLifecycleAdapter));
+			var go = new GameObject(nameof(LunyEngineUnityAdapter));
 			EnsureSingleInstance(go); // safety check, in case of incorrect static field reset with "disabled domain reload"
 			DontDestroyOnLoad(go);
 
 			// CAUTION: Awake and OnEnable run within AddComponent, before _instance is assigned!
-			_instance = go.AddComponent<UnityLifecycleAdapter>();
+			_instance = go.AddComponent<LunyEngineUnityAdapter>();
 
 			// instantiates LunyEngine by "getting" it
 			_instance._lunyEngine = LunyEngine.Instance;
 
-			LunyLogger.LogInfo("Initialization complete.", typeof(UnityLifecycleAdapter));
+			LunyLogger.LogInfo("Initialization complete.", typeof(LunyEngineUnityAdapter));
 		}
 
 		private static void EnsureSingleInstance(GameObject current)
 		{
 			if (_instance != null)
 			{
-				LunyThrow.LifecycleAdapterSingletonDuplicationException(nameof(UnityLifecycleAdapter),
+				LunyThrow.LifecycleAdapterSingletonDuplicationException(nameof(LunyEngineUnityAdapter),
 					_instance.gameObject.name, _instance.GetInstanceID(), current.name, current.GetInstanceID());
 			}
 		}
@@ -65,7 +65,7 @@ namespace Luny.Unity
 			if (_instance != null)
 			{
 				Shutdown(); // clear _instance anyway to avoid exiting with singleton reference with "disabled domain reload"
-				LunyThrow.LifecycleAdapterPrematurelyRemovedException(nameof(UnityLifecycleAdapter));
+				LunyThrow.LifecycleAdapterPrematurelyRemovedException(nameof(LunyEngineUnityAdapter));
 			}
 
 			CollectGarbage();
@@ -81,7 +81,7 @@ namespace Luny.Unity
 
 		private void CollectGarbage() => GC.Collect(0, GCCollectionMode.Forced, true);
 
-		~UnityLifecycleAdapter() => Debug.Log($"[{nameof(UnityLifecycleAdapter)}] finalized {GetHashCode()}");
+		~LunyEngineUnityAdapter() => Debug.Log($"[{nameof(LunyEngineUnityAdapter)}] finalized {GetHashCode()}");
 
 		private void Shutdown()
 		{

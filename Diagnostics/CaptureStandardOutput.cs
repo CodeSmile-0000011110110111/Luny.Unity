@@ -31,7 +31,7 @@ namespace Luny.Unity.Diagnostics
 			{
 				m_StdOutWriter = Console.Out;
 				Console.SetOut(new UnityConsoleWriter());
-				Debug.LogWarning($"StdOut capture enabled. Logs prefixed with '{LogPrefix}' are Terminal logs.");
+				Debug.Log($"{nameof(CaptureStandardOutput)} enabled: Logs prefixed \"{LogPrefix}\" are Terminal logs (eg Console.Write).");
 			}
 		}
 
@@ -98,7 +98,7 @@ namespace Luny.Unity.Diagnostics
 		private static void ToggleEnabledState()
 		{
 			Enabled = !Enabled;
-			Init();
+			Initialize();
 		}
 
 		[MenuItem(MenuItemName, true)]
@@ -109,7 +109,7 @@ namespace Luny.Unity.Diagnostics
 		}
 
 		[InitializeOnLoadMethod]
-		private static void Init()
+		private static void Initialize()
 		{
 			EditorApplication.delayCall += () =>
 			{
@@ -120,7 +120,7 @@ namespace Luny.Unity.Diagnostics
 				CompilationPipeline.compilationStarted += OnCompilationStarted;
 			};
 
-			// deactivate during compilation because compilers might generate a lot of noise
+			// deactivate during compilation because compilers generate a lot of noise
 			static void OnCompilationStarted(Object context) => Deactivate();
 		}
 #endif

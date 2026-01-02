@@ -16,7 +16,7 @@ namespace Luny.UnityEditor.Linking
 				Types = new[]
 				{
 					// lifecycle is using [RuntimeInitializeOnLoadMethod]
-					typeof(UnityLifecycleAdapter).FullName,
+					typeof(LunyEngineUnityAdapter).FullName,
 				},
 			});
 
