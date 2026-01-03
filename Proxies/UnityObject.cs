@@ -69,7 +69,7 @@ namespace Luny.Unity.Proxies
 
 		public override void Destroy()
 		{
-			LunyLogger.LogInfo($"{nameof(UnityObject)}.{nameof(Destroy)}() => {ToString()}", this);
+			// LunyLogger.LogInfo($"{nameof(UnityObject)}.{nameof(Destroy)}() => {this}", this);
 			if (!IsValid)
 				return;
 
@@ -80,7 +80,7 @@ namespace Luny.Unity.Proxies
 
 		public override void DestroyNativeObject()
 		{
-			LunyLogger.LogInfo($"{nameof(UnityObject)}.{nameof(DestroyNativeObject)}() => {_name} ({_nativeID})", this);
+			// LunyLogger.LogInfo($"{nameof(UnityObject)}.{nameof(DestroyNativeObject)}() => {this} => {_gameObject} ({_nativeID})", this);
 			if (IsValid)
 				throw new LunyLifecycleException($"{nameof(DestroyNativeObject)}() called without calling {nameof(Destroy)}() first: {this}");
 

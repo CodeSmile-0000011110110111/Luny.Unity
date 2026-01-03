@@ -7,7 +7,7 @@ using UnityEditor;
 
 namespace Luny.Unity
 {
-	internal sealed partial class LunyEngineUnityAdapter
+	sealed partial class LunyEngineUnityAdapter
 	{
 #if UNITY_EDITOR
 		// precautionary verification that static fields have been set to null
