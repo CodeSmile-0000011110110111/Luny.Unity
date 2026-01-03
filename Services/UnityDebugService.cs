@@ -7,7 +7,7 @@ namespace Luny.Unity.Services
 	/// <summary>
 	/// Unity implementation of Debug.
 	/// </summary>
-	public sealed class UnityDebugService : IDebugService
+	public sealed class UnityDebugService : DebugServiceBase, IDebugService
 	{
 		public void LogInfo(String message) => Debug.Log(message);
 		public void LogWarning(String message) => Debug.LogWarning(message);
