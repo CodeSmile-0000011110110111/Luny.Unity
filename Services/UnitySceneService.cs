@@ -11,7 +11,7 @@ namespace Luny.Unity.Services
 	/// <summary>
 	/// Unity implementation of scene information.
 	/// </summary>
-	public sealed class UnitySceneService : ISceneService
+	public sealed class UnitySceneService : SceneServiceBase, ISceneService
 	{
 		public String CurrentSceneName => SceneManager.GetActiveScene().name;
 
