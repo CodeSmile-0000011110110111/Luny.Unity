@@ -15,10 +15,12 @@ namespace Luny.Unity
 	internal sealed partial class LunyEngineUnityAdapter : MonoBehaviour, IEngineAdapter
 	{
 		// intentionally remains private - user code must use LunyEngine.Instance!
-		private static LunyEngineUnityAdapter s_Instance;
+		private static IEngineAdapter s_Instance;
 
-		// hold on to LunyEngine reference
+		// hold on to LunyEngine reference (not a MonoBehaviour type)
 		private ILunyEngine _lunyEngine;
+
+		private bool _applicationIsQuitting;
 
 		// Note: in builds the SceneManager's root objects list is empty in 'BeforeSceneLoad' (unlike in editor)
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -31,35 +33,28 @@ namespace Luny.Unity
 			LunyLogger.LogInfo("Initializing...", typeof(LunyEngineUnityAdapter));
 
 			var go = new GameObject(nameof(LunyEngineUnityAdapter));
-			EnsureSingleInstance(go); // safety check, in case of incorrect static field reset with "disabled domain reload"
 			DontDestroyOnLoad(go);
 
 			// Note: Awake and OnEnable run within AddComponent, within them s_Instance is and remains null!
 			var unityAdapter = go.AddComponent<LunyEngineUnityAdapter>();
-			EnsureSingleInstance(go); // double-safety check that nothing assigned s_Instance during Awake/OnEnable
-			s_Instance = unityAdapter;
+			s_Instance = IEngineAdapter.ValidateAdapterSingletonInstance(s_Instance, unityAdapter);
 
 			LunyLogger.LogInfo("Initialization complete.", typeof(LunyEngineUnityAdapter));
 		}
 
-		private static void EnsureSingleInstance(GameObject current)
-		{
-			if (s_Instance != null)
-			{
-				LunyThrow.EngineAdapterSingletonDuplicationException(nameof(LunyEngineUnityAdapter),
-					s_Instance.gameObject.name, s_Instance.GetInstanceID(), current.name, current.GetInstanceID());
-			}
-		}
-
-		private void Awake()
-		{
+		private void Awake() =>
 			// Note: s_Instance is and remains null during Awake - this is intentional!
-			EnsureSingleInstance(gameObject);
-
 			_lunyEngine = LunyEngine.CreateInstance(this);
+
+		private void Start()
+		{
+			IEngineAdapter.AssertNotNull(s_Instance);
+			IEngineAdapter.AssertLunyEngineNotNull(_lunyEngine);
+
+			_lunyEngine.OnStartup();
+			// => OnStartup()
 		}
 
-		private void Start() => _lunyEngine.OnStartup(); // => OnStartup()
 		private void FixedUpdate() => _lunyEngine?.OnFixedStep(Time.fixedDeltaTime); // => OnFixedStep()
 		private void Update() => _lunyEngine?.OnUpdate(Time.deltaTime); // => OnUpdate()
 		private void LateUpdate() => _lunyEngine?.OnLateUpdate(Time.deltaTime); // => OnLateUpdate()
@@ -67,6 +62,7 @@ namespace Luny.Unity
 		private void OnApplicationQuit() // => OnShutdown()
 		{
 			LunyLogger.LogInfo($"{nameof(OnApplicationQuit)} running...", this);
+			_applicationIsQuitting = true;
 			Shutdown();
 			LunyLogger.LogInfo($"{nameof(OnApplicationQuit)} complete.", this);
 		}
@@ -76,10 +72,10 @@ namespace Luny.Unity
 			LunyLogger.LogInfo($"{nameof(OnDestroy)} running...", this);
 
 			// we should not get destroyed with an existing instance (indicates manual removal)
-			if (s_Instance != null)
+			if (!_applicationIsQuitting)
 			{
-				Shutdown(); // force shutdown 
-				LunyThrow.EngineAdapterPrematurelyRemovedException(nameof(LunyEngineUnityAdapter));
+				IEngineAdapter.AssertNotPrematurelyRemoved(s_Instance, _lunyEngine);
+				Shutdown();
 			}
 
 			LunyLogger.LogInfo($"{nameof(OnDestroy)} complete.", this);
@@ -97,8 +93,7 @@ namespace Luny.Unity
 
 			try
 			{
-				LunyLogger.LogInfo("Shutdown...", this);
-				_lunyEngine.OnShutdown();
+				IEngineAdapter.ShutdownLunyEngine(s_Instance, _lunyEngine);
 			}
 			catch (Exception ex)
 			{
@@ -106,11 +101,10 @@ namespace Luny.Unity
 			}
 			finally
 			{
+				IEngineAdapter.ShutdownComplete(s_Instance);
+
 				_lunyEngine = null;
 				s_Instance = null;
-
-				LunyLogger.LogInfo("Shutdown complete.", this);
-				LunyLogger.Logger = null;
 			}
 		}
 	}
