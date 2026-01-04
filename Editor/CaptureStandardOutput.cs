@@ -9,7 +9,7 @@ using UnityEditor.Compilation;
 using UnityEngine;
 using Object = System.Object;
 
-namespace Luny.Unity
+namespace Luny.UnityEditor
 {
 	/// <summary>
 	/// Captures all text written to standard output aka StdOut (eg Terminal/Prompt, batch/bash scripts, C# Console.Write)

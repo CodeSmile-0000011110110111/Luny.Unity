@@ -1,4 +1,5 @@
 using Luny.Engine.Bridge;
+using Luny.Engine.Identity;
 using Luny.Exceptions;
 using System;
 using UnityEngine;
@@ -11,7 +12,7 @@ namespace Luny.Unity.Engine.Bridge
 	/// </summary>
 	public sealed class UnityObject : LunyObject
 	{
-		private readonly Int32 _nativeID;
+		private readonly Int32 _nativeObjectID;
 		private String _name;
 		private Boolean _isDestroyed;
 		private Boolean _isEnabled;
@@ -19,23 +20,23 @@ namespace Luny.Unity.Engine.Bridge
 		/// <summary>
 		/// Gets the wrapped Unity GameObject.
 		/// </summary>
-		public GameObject GameObject => As<GameObject>();
-		public override NativeID NativeID => _nativeID;
+		public GameObject GameObject => Cast<GameObject>();
+		public override LunyNativeObjectID NativeObjectID => _nativeObjectID;
 		public override String Name
 		{
 			get
 			{
-				var go = As<GameObject>();
+				var go = Cast<GameObject>();
 				return go != null ? go.name : _name;
 			}
 			set
 			{
-				var go = As<GameObject>();
+				var go = Cast<GameObject>();
 				if (go != null)
 					go.name = _name = value;
 			}
 		}
-		public override Boolean IsValid => !_isDestroyed && As<GameObject>() != null;
+		public override Boolean IsValid => !_isDestroyed && Cast<GameObject>() != null;
 		public override Boolean IsEnabled
 		{
 			get => IsValid && _isEnabled;
@@ -45,7 +46,7 @@ namespace Luny.Unity.Engine.Bridge
 					return;
 
 				_isEnabled = value;
-				var go = As<GameObject>();
+				var go = Cast<GameObject>();
 				if (go != null && go.activeSelf != _isEnabled)
 					go.SetActive(_isEnabled);
 
@@ -57,7 +58,7 @@ namespace Luny.Unity.Engine.Bridge
 			: base(gameObject)
 		{
 			// stored for reference in case object reference unexpectedly becomes null or "missing"
-			_nativeID = gameObject.GetEntityId();
+			_nativeObjectID = gameObject.GetEntityId();
 			_name = gameObject.name;
 
 			// set initial state
@@ -81,7 +82,7 @@ namespace Luny.Unity.Engine.Bridge
 			if (IsValid)
 				throw new LunyLifecycleException($"{nameof(DestroyNativeObject)}() called without calling {nameof(Destroy)}() first: {this}");
 
-			var go = As<GameObject>();
+			var go = Cast<GameObject>();
 			Object.Destroy(go);
 		}
 	}
