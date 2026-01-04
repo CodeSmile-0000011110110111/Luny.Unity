@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using UnityEditor;
 
-namespace Luny.Unity.Services
+namespace Luny.Unity.Engine.Services
 {
 	public sealed partial class UnityApplicationService
 	{

@@ -1,12 +1,12 @@
-using Luny.Proxies;
-using Luny.Services;
-using Luny.Unity.Proxies;
+using Luny.Engine.Bridge;
+using Luny.Engine.Services;
+using Luny.Unity.Engine.Adapters;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Luny.Unity.Services
+namespace Luny.Unity.Engine.Services
 {
 	/// <summary>
 	/// Unity implementation of scene information.
@@ -23,6 +23,8 @@ namespace Luny.Unity.Services
 
 			foreach (var rootObj in rootGameObjects)
 			{
+				// FIXME: we probably shouldn't register all scene objects, just the ones "being used"
+
 				// Add root object
 				allObjects.Add(new UnityObject(rootObj));
 

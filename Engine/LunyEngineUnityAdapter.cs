@@ -1,10 +1,9 @@
-﻿using Luny.Diagnostics;
-using Luny.Exceptions;
-using Luny.Unity.Diagnostics;
+﻿using Luny.Engine;
+using Luny.Unity.Engine.Services;
 using System;
 using UnityEngine;
 
-namespace Luny.Unity
+namespace Luny.Unity.Engine
 {
 	/// <summary>
 	/// Engine hook. Provides no public or internal API.

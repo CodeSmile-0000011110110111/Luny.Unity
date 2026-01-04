@@ -1,8 +1,8 @@
-using Luny.Services;
+using Luny.Engine.Services;
 using System;
 using UnityEngine;
 
-namespace Luny.Unity.Services
+namespace Luny.Unity.Engine.Services
 {
 	/// <summary>
 	/// Unity implementation of application control.

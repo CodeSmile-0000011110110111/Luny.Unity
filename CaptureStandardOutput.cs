@@ -9,7 +9,7 @@ using UnityEditor.Compilation;
 using UnityEngine;
 using Object = System.Object;
 
-namespace Luny.Unity.Diagnostics
+namespace Luny.Unity
 {
 	/// <summary>
 	/// Captures all text written to standard output aka StdOut (eg Terminal/Prompt, batch/bash scripts, C# Console.Write)
@@ -20,7 +20,7 @@ namespace Luny.Unity.Diagnostics
 	/// This functionality can be toggled under Window/CodeSmile/Capture Standard Output. At runtime it can
 	/// be enabled by calling CaptureStandardOutput.Activate() or Deactivate().
 	/// </remarks>
-	public static class CaptureStandardOutput
+	internal static class CaptureStandardOutput
 	{
 		private const String LogPrefix = "> ";
 		private static TextWriter m_StdOutWriter;

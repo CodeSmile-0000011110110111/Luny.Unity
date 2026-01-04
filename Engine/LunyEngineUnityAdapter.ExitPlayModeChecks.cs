@@ -1,11 +1,8 @@
-using Luny.Diagnostics;
-using Luny.Unity.Diagnostics;
-using UnityEngine;
-#if UNITY_EDITOR
+using Luny.Unity.Engine.Services;
 using UnityEditor;
-#endif
+using UnityEngine;
 
-namespace Luny.Unity
+namespace Luny.Unity.Engine
 {
 	sealed partial class LunyEngineUnityAdapter
 	{

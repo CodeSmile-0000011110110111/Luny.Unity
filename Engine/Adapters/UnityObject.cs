@@ -1,11 +1,9 @@
-using Luny.Diagnostics;
+using Luny.Engine.Bridge;
 using Luny.Exceptions;
-using Luny.Proxies;
 using System;
 using UnityEngine;
-using SystemObject = System.Object;
 
-namespace Luny.Unity.Proxies
+namespace Luny.Unity.Engine.Adapters
 {
 	/// <summary>
 	/// Unity-specific implementation wrapping UnityEngine.GameObject.
