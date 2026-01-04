@@ -26,14 +26,14 @@ namespace Luny.Unity.Engine.Services
 				// FIXME: we probably shouldn't register all scene objects, just the ones "being used"
 
 				// Add root object
-				allObjects.Add(new UnityObject(rootObj));
+				allObjects.Add(new UnityGameObject(rootObj));
 
 				// Add all children recursively
 				var transforms = rootObj.GetComponentsInChildren<Transform>(true);
 				foreach (var transform in transforms)
 				{
 					if (transform.gameObject != rootObj) // Skip root (already added)
-						allObjects.Add(new UnityObject(transform.gameObject));
+						allObjects.Add(new UnityGameObject(transform.gameObject));
 				}
 			}
 
@@ -54,14 +54,14 @@ namespace Luny.Unity.Engine.Services
 			foreach (var rootObj in rootGameObjects)
 			{
 				if (rootObj.name == name)
-					return new UnityObject(rootObj);
+					return new UnityGameObject(rootObj);
 
 				// Search children
 				var transforms = rootObj.GetComponentsInChildren<Transform>(true);
 				foreach (var transform in transforms)
 				{
 					if (transform.gameObject.name == name)
-						return new UnityObject(transform.gameObject);
+						return new UnityGameObject(transform.gameObject);
 				}
 			}
 
