@@ -2,6 +2,7 @@ using Luny.Engine.Bridge;
 using Luny.Exceptions;
 using System;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Luny.Unity.Engine.Adapters
 {
@@ -48,14 +49,12 @@ namespace Luny.Unity.Engine.Adapters
 				if (go != null && go.activeSelf != _isEnabled)
 					go.SetActive(_isEnabled);
 
-				if (_isEnabled)
-					InvokeOnEnable();
-				else
-					InvokeOnDisable();
+				InvokeOnEnableOrOnDisable(_isEnabled);
 			}
 		}
 
-		public UnityObject(GameObject gameObject) : base(gameObject)
+		public UnityObject(GameObject gameObject)
+			: base(gameObject)
 		{
 			// stored for reference in case object reference unexpectedly becomes null or "missing"
 			_nativeID = gameObject.GetEntityId();
@@ -83,7 +82,7 @@ namespace Luny.Unity.Engine.Adapters
 				throw new LunyLifecycleException($"{nameof(DestroyNativeObject)}() called without calling {nameof(Destroy)}() first: {this}");
 
 			var go = As<GameObject>();
-			UnityEngine.Object.Destroy(go);
+			Object.Destroy(go);
 		}
 	}
 }

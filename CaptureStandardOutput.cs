@@ -113,8 +113,10 @@ namespace Luny.Unity
 		{
 			EditorApplication.delayCall += () =>
 			{
-				if (Enabled) Activate();
-				else Deactivate();
+				if (Enabled)
+					Activate();
+				else
+					Deactivate();
 
 				CompilationPipeline.compilationStarted -= OnCompilationStarted;
 				CompilationPipeline.compilationStarted += OnCompilationStarted;

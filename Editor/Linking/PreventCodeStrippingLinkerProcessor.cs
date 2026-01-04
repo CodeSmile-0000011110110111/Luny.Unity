@@ -1,5 +1,4 @@
 ﻿using Luny.Engine;
-using Luny.Unity;
 using Luny.Unity.Engine;
 using System;
 
@@ -14,7 +13,7 @@ namespace Luny.UnityEditor.Linking
 
 			details.Add(new PreserveDetails
 			{
-				Assembly = $"{nameof(Luny)}.{nameof(Luny.Unity)}",
+				Assembly = $"{nameof(Luny)}.{nameof(Unity)}",
 				Types = new[]
 				{
 					// lifecycle is using [RuntimeInitializeOnLoadMethod]
