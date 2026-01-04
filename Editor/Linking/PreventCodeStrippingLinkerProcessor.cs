@@ -1,5 +1,4 @@
-﻿using Luny.Engine;
-using Luny.Engine.Registries;
+﻿using Luny.Engine.Registries;
 using Luny.Unity.Engine;
 using System;
 
@@ -10,7 +9,7 @@ namespace Luny.UnityEditor.Linking
 		public override PreserveDetails[] GetPreserveDetails()
 		{
 			// Engine services are discovered through reflection
-			var details = PreserveAllDerivedClasses<IEngineService>();
+			var details = PreserveAllDerivedClasses<ILunyEngineService>();
 
 			details.Add(new PreserveDetails
 			{
