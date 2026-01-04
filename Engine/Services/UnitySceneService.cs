@@ -1,6 +1,6 @@
 using Luny.Engine.Bridge;
 using Luny.Engine.Services;
-using Luny.Unity.Engine.Adapters;
+using Luny.Unity.Engine.Bridge;
 using System;
 using System.Collections.Generic;
 using UnityEngine;

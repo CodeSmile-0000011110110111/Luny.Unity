@@ -4,7 +4,7 @@ using System;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Luny.Unity.Engine.Adapters
+namespace Luny.Unity.Engine.Bridge
 {
 	/// <summary>
 	/// Unity-specific implementation wrapping UnityEngine.GameObject.
