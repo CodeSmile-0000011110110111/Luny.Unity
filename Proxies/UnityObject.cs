@@ -12,7 +12,6 @@ namespace Luny.Unity.Proxies
 	/// </summary>
 	public sealed class UnityObject : LunyObject
 	{
-		private GameObject _gameObject;
 		private readonly Int32 _nativeID;
 		private String _name;
 		private Boolean _isDestroyed;
@@ -21,18 +20,23 @@ namespace Luny.Unity.Proxies
 		/// <summary>
 		/// Gets the wrapped Unity GameObject.
 		/// </summary>
-		public GameObject GameObject => _gameObject;
+		public GameObject GameObject => As<GameObject>();
 		public override NativeID NativeID => _nativeID;
 		public override String Name
 		{
-			get => IsValid ? _gameObject.name : _name;
+			get
+			{
+				var go = As<GameObject>();
+				return go != null ? go.name : _name;
+			}
 			set
 			{
-				if (IsValid)
-					_gameObject.name = _name = value;
+				var go = As<GameObject>();
+				if (go != null)
+					go.name = _name = value;
 			}
 		}
-		public override Boolean IsValid => !_isDestroyed && _gameObject != null;
+		public override Boolean IsValid => !_isDestroyed && As<GameObject>() != null;
 		public override Boolean IsEnabled
 		{
 			get => IsValid && _isEnabled;
@@ -42,23 +46,19 @@ namespace Luny.Unity.Proxies
 					return;
 
 				_isEnabled = value;
-				if (_gameObject.activeSelf != _isEnabled)
-					_gameObject.SetActive(_isEnabled);
+				var go = As<GameObject>();
+				if (go != null && go.activeSelf != _isEnabled)
+					go.SetActive(_isEnabled);
 
 				if (_isEnabled)
-					OnEnable?.Invoke();
+					InvokeOnEnable();
 				else
-					OnDisable?.Invoke();
+					InvokeOnDisable();
 			}
 		}
 
-		public UnityObject(GameObject gameObject)
+		public UnityObject(GameObject gameObject) : base(gameObject)
 		{
-			if (gameObject == null)
-				throw new ArgumentNullException(nameof(gameObject), $"{nameof(UnityObject)} {nameof(GameObject)} reference must not be null.");
-
-			_gameObject = gameObject;
-
 			// stored for reference in case object reference unexpectedly becomes null or "missing"
 			_nativeID = gameObject.GetEntityId();
 			_name = gameObject.name;
@@ -74,7 +74,7 @@ namespace Luny.Unity.Proxies
 				return;
 
 			IsEnabled = false; // triggers OnDisable
-			OnDestroy?.Invoke();
+			InvokeOnDestroy();
 			_isDestroyed = true; // Mark as destroyed (native destruction happens later)
 		}
 
@@ -84,10 +84,8 @@ namespace Luny.Unity.Proxies
 			if (IsValid)
 				throw new LunyLifecycleException($"{nameof(DestroyNativeObject)}() called without calling {nameof(Destroy)}() first: {this}");
 
-			UnityEngine.Object.Destroy(_gameObject);
-			_gameObject = null;
+			var go = As<GameObject>();
+			UnityEngine.Object.Destroy(go);
 		}
-
-		public override SystemObject GetNativeObject() => _gameObject;
 	}
 }
