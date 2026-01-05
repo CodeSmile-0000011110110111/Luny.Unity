@@ -1,4 +1,5 @@
 ﻿using Luny.Engine;
+using Luny.Engine.Bridge;
 using Luny.Unity.Engine.Services;
 using System;
 using UnityEngine;
@@ -11,10 +12,10 @@ namespace Luny.Unity.Engine
 	[DefaultExecutionOrder(Int32.MinValue)] // Run before all other scripts
 	[AddComponentMenu("GameObject/")] // Do not list in "Add Component" menu
 	[DisallowMultipleComponent]
-	internal sealed partial class LunyEngineUnityAdapter : MonoBehaviour, ILunyEngineAdapter
+	internal sealed partial class LunyEngineUnityAdapter : MonoBehaviour, ILunyEngineNativeAdapter
 	{
 		// intentionally remains private - user code must use LunyEngine.Instance!
-		private static ILunyEngineAdapter s_Instance;
+		private static ILunyEngineNativeAdapter s_Instance;
 
 		// hold on to LunyEngine reference (not a MonoBehaviour type)
 		private ILunyEngine _lunyEngine;
@@ -36,7 +37,7 @@ namespace Luny.Unity.Engine
 
 			// Note: Awake and OnEnable run within AddComponent, within them s_Instance is and remains null!
 			var unityAdapter = go.AddComponent<LunyEngineUnityAdapter>();
-			s_Instance = ILunyEngineAdapter.ValidateAdapterSingletonInstance(s_Instance, unityAdapter);
+			s_Instance = ILunyEngineNativeAdapter.ValidateAdapterSingletonInstance(s_Instance, unityAdapter);
 
 			LunyLogger.LogInfo("Initialization complete.", typeof(LunyEngineUnityAdapter));
 		}
@@ -47,16 +48,16 @@ namespace Luny.Unity.Engine
 
 		private void Start()
 		{
-			ILunyEngineAdapter.AssertNotNull(s_Instance);
-			ILunyEngineAdapter.AssertLunyEngineNotNull(_lunyEngine);
+			ILunyEngineNativeAdapter.AssertNotNull(s_Instance);
+			ILunyEngineNativeAdapter.AssertLunyEngineNotNull(_lunyEngine);
 
-			_lunyEngine.OnStartup();
+			_lunyEngine.OnEngineStartup();
 			// => OnStartup()
 		}
 
-		private void FixedUpdate() => _lunyEngine?.OnFixedStep(Time.fixedDeltaTime); // => OnFixedStep()
-		private void Update() => _lunyEngine?.OnUpdate(Time.deltaTime); // => OnUpdate()
-		private void LateUpdate() => _lunyEngine?.OnLateUpdate(Time.deltaTime); // => OnLateUpdate()
+		private void FixedUpdate() => _lunyEngine?.OnEngineFixedStep(Time.fixedDeltaTime); // => OnFixedStep()
+		private void Update() => _lunyEngine?.OnEngineUpdate(Time.deltaTime); // => OnUpdate()
+		private void LateUpdate() => _lunyEngine?.OnEngineLateUpdate(Time.deltaTime); // => OnLateUpdate()
 
 		private void OnApplicationQuit() // => OnShutdown()
 		{
@@ -73,7 +74,7 @@ namespace Luny.Unity.Engine
 			// we should not get destroyed with an existing instance (indicates manual removal)
 			if (!_applicationIsQuitting)
 			{
-				ILunyEngineAdapter.AssertNotPrematurelyRemoved(s_Instance, _lunyEngine);
+				ILunyEngineNativeAdapter.AssertNotPrematurelyRemoved(s_Instance, _lunyEngine);
 				Shutdown();
 			}
 
@@ -92,7 +93,7 @@ namespace Luny.Unity.Engine
 
 			try
 			{
-				ILunyEngineAdapter.ShutdownLunyEngine(s_Instance, _lunyEngine);
+				ILunyEngineNativeAdapter.ShutdownLunyEngine(s_Instance, _lunyEngine);
 			}
 			catch (Exception ex)
 			{
@@ -100,7 +101,7 @@ namespace Luny.Unity.Engine
 			}
 			finally
 			{
-				ILunyEngineAdapter.ShutdownComplete(s_Instance);
+				ILunyEngineNativeAdapter.ShutdownComplete(s_Instance);
 
 				_lunyEngine = null;
 				s_Instance = null;
