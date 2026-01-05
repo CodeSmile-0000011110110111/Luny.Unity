@@ -1,5 +1,4 @@
-﻿using Luny.Engine.Registries;
-using Luny.Unity.Engine;
+﻿using Luny.Unity.Engine;
 using System;
 
 namespace Luny.UnityEditor.Linking

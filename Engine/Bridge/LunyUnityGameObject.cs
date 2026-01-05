@@ -8,14 +8,14 @@ namespace Luny.Unity.Engine.Bridge
 	/// <summary>
 	/// Unity-specific implementation wrapping UnityEngine.GameObject.
 	/// </summary>
-	internal sealed class UnityGameObject : LunyObject
+	internal sealed class LunyUnityGameObject : LunyObject
 	{
 		private GameObject GameObject => Cast<GameObject>();
 
 		private static Boolean IsNativeObjectVisible(GameObject gameObject) =>
 			gameObject.TryGetComponent<Renderer>(out var renderer) && renderer.enabled;
 
-		public UnityGameObject(GameObject gameObject)
+		public LunyUnityGameObject(GameObject gameObject)
 			: base(gameObject, gameObject.GetEntityId(), gameObject.activeSelf, IsNativeObjectVisible(gameObject)) {}
 
 		protected override void DestroyNativeObject() => Object.Destroy(GameObject);

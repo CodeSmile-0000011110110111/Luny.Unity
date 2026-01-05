@@ -1,5 +1,4 @@
-﻿using Luny.Engine;
-using Luny.Engine.Bridge;
+﻿using Luny.Engine.Bridge;
 using Luny.Unity.Engine.Services;
 using System;
 using UnityEngine;
@@ -42,14 +41,15 @@ namespace Luny.Unity.Engine
 			LunyLogger.LogInfo("Initialization complete.", typeof(LunyEngineUnityAdapter));
 		}
 
-		private void Awake() =>
-			// Note: s_Instance is and remains null during Awake - this is intentional!
-			_lunyEngine = LunyEngine.CreateInstance(this);
+		private static void CollectGarbage() => GC.Collect(0, GCCollectionMode.Forced, true);
+
+		// Note: s_Instance is and remains null during Awake - this is intentional!
+		private void Awake() => _lunyEngine = LunyEngine.CreateInstance(this);
 
 		private void Start()
 		{
-			ILunyEngineNativeAdapter.AssertNotNull(s_Instance);
-			ILunyEngineNativeAdapter.AssertLunyEngineNotNull(_lunyEngine);
+			ILunyEngineNativeAdapter.ThrowIfAdapterNull(s_Instance);
+			ILunyEngineNativeAdapter.ThrowIfLunyEngineNull(_lunyEngine);
 
 			_lunyEngine.OnEngineStartup();
 			// => OnStartup()
@@ -74,15 +74,13 @@ namespace Luny.Unity.Engine
 			// we should not get destroyed with an existing instance (indicates manual removal)
 			if (!_applicationIsQuitting)
 			{
-				ILunyEngineNativeAdapter.AssertNotPrematurelyRemoved(s_Instance, _lunyEngine);
+				ILunyEngineNativeAdapter.ThrowIfPrematurelyRemoved(s_Instance, _lunyEngine);
 				Shutdown();
 			}
 
 			LunyLogger.LogInfo($"{nameof(OnDestroy)} complete.", this);
 			CollectGarbage();
 		}
-
-		private void CollectGarbage() => GC.Collect(0, GCCollectionMode.Forced, true);
 
 		~LunyEngineUnityAdapter() => LunyLogger.LogInfo($"[{nameof(LunyEngineUnityAdapter)}] finalized {GetHashCode()}");
 
@@ -93,7 +91,7 @@ namespace Luny.Unity.Engine
 
 			try
 			{
-				ILunyEngineNativeAdapter.ShutdownLunyEngine(s_Instance, _lunyEngine);
+				ILunyEngineNativeAdapter.Shutdown(s_Instance, _lunyEngine);
 			}
 			catch (Exception ex)
 			{
