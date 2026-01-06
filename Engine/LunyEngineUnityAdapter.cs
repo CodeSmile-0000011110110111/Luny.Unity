@@ -1,5 +1,4 @@
-﻿using Luny.Engine.Bridge;
-using Luny.Engine.Services;
+﻿using Luny.Engine.Services;
 using Luny.Unity.Engine.Services;
 using System;
 using UnityEngine;
@@ -20,8 +19,6 @@ namespace Luny.Unity.Engine
 		// hold on to LunyEngine reference (not a MonoBehaviour type)
 		private ILunyEngine _lunyEngine;
 
-		private Boolean _applicationIsQuitting;
-
 		// Note: in builds the SceneManager's root objects list is empty in 'BeforeSceneLoad' (unlike in editor)
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 		private static void OnBeforeSceneLoad() => Initialize();
@@ -39,7 +36,7 @@ namespace Luny.Unity.Engine
 			var unityAdapter = go.AddComponent<LunyEngineUnityAdapter>();
 			s_Instance = ILunyEngineNativeAdapter.ValidateAdapterSingletonInstance(s_Instance, unityAdapter);
 
-			LunyTraceLogger.LogInfoInitializationComplete(typeof(LunyEngineUnityAdapter));
+			LunyTraceLogger.LogInfoInitialized(typeof(LunyEngineUnityAdapter));
 		}
 
 		// Note: s_Instance is and remains null during Awake - this is intentional!
@@ -60,7 +57,7 @@ namespace Luny.Unity.Engine
 
 		private void OnApplicationQuit() // => OnShutdown()
 		{
-			_applicationIsQuitting = true;
+			ILunyEngineNativeAdapter.IsApplicationQuitting = true;
 			Shutdown();
 		}
 
@@ -69,11 +66,7 @@ namespace Luny.Unity.Engine
 			LunyTraceLogger.LogInfoDestroying(this);
 
 			// we should not get destroyed with an existing instance (indicates manual removal)
-			if (!_applicationIsQuitting)
-			{
-				ILunyEngineNativeAdapter.ThrowIfPrematurelyRemoved(s_Instance, _lunyEngine);
-				Shutdown();
-			}
+			ILunyEngineNativeAdapter.ThrowIfPrematurelyRemoved(s_Instance, _lunyEngine);
 
 			LunyTraceLogger.LogInfoDestroyed(this);
 			ILunyEngineNativeAdapter.EndLogging();
