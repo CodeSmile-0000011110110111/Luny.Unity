@@ -13,7 +13,10 @@ namespace Luny.Unity.Engine.Services
 	/// </summary>
 	public sealed class UnitySceneService : SceneServiceBase, ISceneService
 	{
-		public String CurrentSceneName => SceneManager.GetActiveScene().name;
+		public String ActiveSceneName => SceneManager.GetActiveScene().name;
+
+		// FIXME: temporary solution, converts every object to LunyObject without even consulting the LunyObjectRegistry
+		public void ReloadScene() => SceneManager.LoadScene(ActiveSceneName, LoadSceneMode.Single);
 
 		public IReadOnlyList<ILunyObject> GetAllObjects()
 		{
@@ -40,6 +43,7 @@ namespace Luny.Unity.Engine.Services
 			return allObjects;
 		}
 
+		// FIXME: temporary solutions, does not consult with LunyObjectRegistry for existing objects
 		public ILunyObject FindObjectByName(String name)
 		{
 			if (String.IsNullOrEmpty(name))
@@ -67,5 +71,22 @@ namespace Luny.Unity.Engine.Services
 
 			return null;
 		}
+
+		protected override void OnServiceStartup()
+		{
+			SceneManager.sceneLoaded += OnNativeSceneLoaded;
+			SceneManager.sceneUnloaded += OnNativeSceneUnloaded;
+		}
+
+		protected override void OnServiceShutdown()
+		{
+			SceneManager.sceneLoaded -= OnNativeSceneLoaded;
+			SceneManager.sceneUnloaded -= OnNativeSceneUnloaded;
+		}
+
+		private void OnNativeSceneLoaded(Scene scene, LoadSceneMode loadMode) =>
+			LunyLogger.LogInfo($"{nameof(OnNativeSceneLoaded)}: {scene}", this);
+
+		private void OnNativeSceneUnloaded(Scene scene) => LunyLogger.LogInfo($"{nameof(OnNativeSceneUnloaded)}: {scene}", this);
 	}
 }

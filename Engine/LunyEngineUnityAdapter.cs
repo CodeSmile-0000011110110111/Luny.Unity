@@ -1,4 +1,5 @@
 ﻿using Luny.Engine.Bridge;
+using Luny.Engine.Services;
 using Luny.Unity.Engine.Services;
 using System;
 using UnityEngine;
@@ -29,7 +30,7 @@ namespace Luny.Unity.Engine
 		{
 			// Logging comes first, we don't want to miss anything
 			LunyLogger.Logger = new UnityLogger();
-			LunyLogger.LogInfo("Initializing...", typeof(LunyEngineUnityAdapter));
+			LunyTraceLogger.LogInfoInitializing(typeof(LunyEngineUnityAdapter));
 
 			var go = new GameObject(nameof(LunyEngineUnityAdapter));
 			DontDestroyOnLoad(go);
@@ -38,10 +39,8 @@ namespace Luny.Unity.Engine
 			var unityAdapter = go.AddComponent<LunyEngineUnityAdapter>();
 			s_Instance = ILunyEngineNativeAdapter.ValidateAdapterSingletonInstance(s_Instance, unityAdapter);
 
-			LunyLogger.LogInfo("Initialization complete.", typeof(LunyEngineUnityAdapter));
+			LunyTraceLogger.LogInfoInitializationComplete(typeof(LunyEngineUnityAdapter));
 		}
-
-		private static void CollectGarbage() => GC.Collect(0, GCCollectionMode.Forced, true);
 
 		// Note: s_Instance is and remains null during Awake - this is intentional!
 		private void Awake() => _lunyEngine = LunyEngine.CreateInstance(this);
@@ -61,15 +60,13 @@ namespace Luny.Unity.Engine
 
 		private void OnApplicationQuit() // => OnShutdown()
 		{
-			LunyLogger.LogInfo($"{nameof(OnApplicationQuit)} running...", this);
 			_applicationIsQuitting = true;
 			Shutdown();
-			LunyLogger.LogInfo($"{nameof(OnApplicationQuit)} complete.", this);
 		}
 
 		private void OnDestroy()
 		{
-			LunyLogger.LogInfo($"{nameof(OnDestroy)} running...", this);
+			LunyTraceLogger.LogInfoDestroying(this);
 
 			// we should not get destroyed with an existing instance (indicates manual removal)
 			if (!_applicationIsQuitting)
@@ -78,11 +75,11 @@ namespace Luny.Unity.Engine
 				Shutdown();
 			}
 
-			LunyLogger.LogInfo($"{nameof(OnDestroy)} complete.", this);
-			CollectGarbage();
+			LunyTraceLogger.LogInfoDestroyed(this);
+			ILunyEngineNativeAdapter.EndLogging();
 		}
 
-		~LunyEngineUnityAdapter() => LunyLogger.LogInfo($"[{nameof(LunyEngineUnityAdapter)}] finalized {GetHashCode()}");
+		~LunyEngineUnityAdapter() => LunyTraceLogger.LogInfoFinalized(this);
 
 		private void Shutdown()
 		{
