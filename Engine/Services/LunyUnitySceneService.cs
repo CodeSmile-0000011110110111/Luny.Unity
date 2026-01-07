@@ -13,13 +13,11 @@ namespace Luny.Unity.Engine.Services
 	/// </summary>
 	public sealed class LunyUnitySceneService : LunySceneServiceBase, ILunySceneService
 	{
-		public String ActiveSceneName => SceneManager.GetActiveScene().name;
-
-		// FIXME: temporary solution, converts every object to LunyObject without even consulting the LunyObjectRegistry
-		public void ReloadScene() => SceneManager.LoadScene(ActiveSceneName, LoadSceneMode.Single);
+		public void ReloadScene() => SceneManager.LoadScene(CurrentScene?.Name, LoadSceneMode.Single);
 
 		public IReadOnlyList<ILunyObject> GetAllObjects()
 		{
+			// FIXME: temporary solution, converts every object to LunyObject without even consulting the LunyObjectRegistry
 			var scene = SceneManager.GetActiveScene();
 			var rootGameObjects = scene.GetRootGameObjects();
 			var allObjects = new List<ILunyObject>();
@@ -43,9 +41,9 @@ namespace Luny.Unity.Engine.Services
 			return allObjects;
 		}
 
-		// FIXME: temporary solutions, does not consult with LunyObjectRegistry for existing objects
 		public ILunyObject FindObjectByName(String name)
 		{
+			// FIXME: temporary solutions, does not consult with LunyObjectRegistry for existing objects
 			if (String.IsNullOrEmpty(name))
 				return null;
 
@@ -74,37 +72,44 @@ namespace Luny.Unity.Engine.Services
 
 		protected override void OnServiceInitialize()
 		{
-			var activeScene = SceneManager.GetActiveScene();
-			CurrentScene = new LunyUnityScene(activeScene);
-
-			LunyLogger.LogWarning($"{nameof(OnServiceInitialize)}: CurrentScene={CurrentScene}", this);
-
 			SceneManager.sceneLoaded += OnNativeSceneLoaded;
 			SceneManager.sceneUnloaded += OnNativeSceneUnloaded;
 		}
 
-		protected override void OnServiceStartup() {}
+		protected override void OnServiceStartup()
+		{
+			CurrentScene = new LunyUnityScene(SceneManager.GetActiveScene());
+			LunyLogger.LogInfo($"{nameof(OnServiceInitialize)}: CurrentScene={CurrentScene}", this);
+
+			InvokeOnSceneLoaded(CurrentScene);
+		}
 
 		protected override void OnServiceShutdown()
 		{
 			SceneManager.sceneLoaded -= OnNativeSceneLoaded;
 			SceneManager.sceneUnloaded -= OnNativeSceneUnloaded;
+			CurrentScene = null;
 		}
 
 		private void OnNativeSceneLoaded(Scene scene, LoadSceneMode loadMode)
 		{
-			if (CurrentScene == null)
+			if (loadMode == LoadSceneMode.Single)
 				CurrentScene = new LunyUnityScene(scene);
+			else
+				throw new NotImplementedException("additive scene load not yet supported");
 
-			LunyLogger.LogWarning($"{nameof(OnNativeSceneLoaded)}: {scene.name} => {ToString()}", this);
+			LunyLogger.LogInfo($"{nameof(OnNativeSceneLoaded)}: {CurrentScene} => {ToString()}", this);
+			InvokeOnSceneLoaded(CurrentScene);
 		}
 
 		private void OnNativeSceneUnloaded(Scene scene)
 		{
+			LunyLogger.LogInfo($"{nameof(OnNativeSceneUnloaded)}: {CurrentScene} => {ToString()}", this);
 			if (CurrentScene?.Name == scene.name)
+			{
+				InvokeOnSceneUnloaded(CurrentScene);
 				CurrentScene = null;
-
-			LunyLogger.LogWarning($"{nameof(OnNativeSceneUnloaded)}: {scene.name} => {ToString()}", this);
+			}
 		}
 	}
 }

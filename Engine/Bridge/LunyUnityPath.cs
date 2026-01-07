@@ -1,6 +1,5 @@
 ﻿using Luny.Engine.Bridge;
 using System;
-using UnityEngine;
 
 namespace Luny.Unity.Engine.Bridge
 {
@@ -12,8 +11,6 @@ namespace Luny.Unity.Engine.Bridge
 			: base(nativePath) {}
 
 		// Unity paths are fine, provided they are not absolute paths
-		protected override String ToEngineAgnosticPath(String nativePath) => nativePath.StartsWith(Application.dataPath)
-			? nativePath.Substring(Application.dataPath.Length)
-			: nativePath;
+		protected override String ToEngineAgnosticPath(String nativePath) => nativePath;
 	}
 }
