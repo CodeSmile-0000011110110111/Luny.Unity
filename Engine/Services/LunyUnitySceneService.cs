@@ -72,13 +72,18 @@ namespace Luny.Unity.Engine.Services
 			return null;
 		}
 
-		protected override void OnServiceInitialize() {}
-
-		protected override void OnServiceStartup()
+		protected override void OnServiceInitialize()
 		{
+			var activeScene = SceneManager.GetActiveScene();
+			CurrentScene = new LunyUnityScene(activeScene);
+
+			LunyLogger.LogWarning($"{nameof(OnServiceInitialize)}: CurrentScene={CurrentScene}", this);
+
 			SceneManager.sceneLoaded += OnNativeSceneLoaded;
 			SceneManager.sceneUnloaded += OnNativeSceneUnloaded;
 		}
+
+		protected override void OnServiceStartup() {}
 
 		protected override void OnServiceShutdown()
 		{
@@ -86,9 +91,20 @@ namespace Luny.Unity.Engine.Services
 			SceneManager.sceneUnloaded -= OnNativeSceneUnloaded;
 		}
 
-		private void OnNativeSceneLoaded(Scene scene, LoadSceneMode loadMode) =>
-			LunyLogger.LogInfo($"{nameof(OnNativeSceneLoaded)}: {scene}", this);
+		private void OnNativeSceneLoaded(Scene scene, LoadSceneMode loadMode)
+		{
+			if (CurrentScene == null)
+				CurrentScene = new LunyUnityScene(scene);
 
-		private void OnNativeSceneUnloaded(Scene scene) => LunyLogger.LogInfo($"{nameof(OnNativeSceneUnloaded)}: {scene}", this);
+			LunyLogger.LogWarning($"{nameof(OnNativeSceneLoaded)}: {scene.name} => {ToString()}", this);
+		}
+
+		private void OnNativeSceneUnloaded(Scene scene)
+		{
+			if (CurrentScene?.Name == scene.name)
+				CurrentScene = null;
+
+			LunyLogger.LogWarning($"{nameof(OnNativeSceneUnloaded)}: {scene.name} => {ToString()}", this);
+		}
 	}
 }
