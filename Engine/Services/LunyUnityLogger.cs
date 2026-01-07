@@ -1,13 +1,12 @@
-﻿using Luny.Engine.Services;
 using System;
 using UnityEngine;
 
 namespace Luny.Unity.Engine.Services
 {
 	/// <summary>
-	/// Unity implementation of Debug.
+	/// Unity-specific implementation of the Luny logger that forwards to UnityEngine.Debug.
 	/// </summary>
-	public sealed class UnityDebugService : DebugServiceBase, IDebugService
+	public sealed class LunyUnityLogger : ILunyLogger
 	{
 		public void LogInfo(String message) => Debug.Log(message);
 		public void LogWarning(String message) => Debug.LogWarning(message);

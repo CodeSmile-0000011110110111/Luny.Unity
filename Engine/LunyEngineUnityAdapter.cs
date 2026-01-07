@@ -1,4 +1,5 @@
-﻿using Luny.Engine.Services;
+﻿using Luny.Engine;
+using Luny.Engine.Services;
 using Luny.Unity.Engine.Services;
 using System;
 using UnityEngine;
@@ -26,7 +27,7 @@ namespace Luny.Unity.Engine
 		private static void Initialize()
 		{
 			// Logging comes first, we don't want to miss anything
-			LunyLogger.Logger = new UnityLogger();
+			LunyLogger.Logger = new LunyUnityLogger();
 			LunyTraceLogger.LogInfoInitializing(typeof(LunyEngineUnityAdapter));
 
 			var go = new GameObject(nameof(LunyEngineUnityAdapter));

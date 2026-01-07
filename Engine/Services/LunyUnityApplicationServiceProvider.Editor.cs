@@ -3,7 +3,7 @@ using UnityEditor;
 
 namespace Luny.Unity.Engine.Services
 {
-	public sealed partial class UnityApplicationService
+	public sealed partial class LunyUnityApplicationService
 	{
 		[Conditional("UNITY_EDITOR")]
 		private void ExitPlayModeWhenInEditor()

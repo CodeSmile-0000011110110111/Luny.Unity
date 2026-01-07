@@ -11,7 +11,7 @@ namespace Luny.Unity.Engine.Services
 	/// <summary>
 	/// Unity implementation of scene information.
 	/// </summary>
-	public sealed class UnitySceneService : SceneServiceBase, ISceneService
+	public sealed class LunyUnitySceneService : LunySceneServiceBase, ILunySceneService
 	{
 		public String ActiveSceneName => SceneManager.GetActiveScene().name;
 
@@ -71,6 +71,8 @@ namespace Luny.Unity.Engine.Services
 
 			return null;
 		}
+
+		protected override void OnServiceInitialize() {}
 
 		protected override void OnServiceStartup()
 		{
