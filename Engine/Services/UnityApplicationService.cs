@@ -19,8 +19,8 @@ namespace Luny.Unity.Engine.Services
 			ExitPlayModeWhenInEditor();
 		}
 
-		protected override void OnServiceInitialize(){}
-		protected override void OnServiceStartup(){}
+		protected override void OnServiceInitialize() {}
+		protected override void OnServiceStartup() {}
 
 		protected override void OnServiceShutdown() {}
 	}

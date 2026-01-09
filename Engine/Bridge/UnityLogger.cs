@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Luny.Unity.Engine
+namespace Luny.Unity.Engine.Bridge
 {
 	/// <summary>
 	/// Unity-specific implementation of the Luny logger that forwards to UnityEngine.Debug.
