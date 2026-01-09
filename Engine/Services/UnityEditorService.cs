@@ -6,7 +6,7 @@ namespace Luny.Unity.Engine.Services
 	/// <summary>
 	/// Unity implementation of Debug.
 	/// </summary>
-	public sealed class LunyUnityEditorService : LunyEditorServiceBase, ILunyEditorService
+	public sealed class UnityEditorService : LunyEditorServiceBase, ILunyEditorService
 	{
 		public void PausePlayer() => Debug.Break();
 		protected override void OnServiceInitialize() {}

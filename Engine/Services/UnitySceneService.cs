@@ -11,7 +11,7 @@ namespace Luny.Unity.Engine.Services
 	/// <summary>
 	/// Unity implementation of scene information.
 	/// </summary>
-	public sealed class LunyUnitySceneService : LunySceneServiceBase, ILunySceneService
+	public sealed class UnitySceneService : LunySceneServiceBase, ILunySceneService
 	{
 		public void ReloadScene() => SceneManager.LoadScene(CurrentScene?.Name, LoadSceneMode.Single);
 
@@ -27,14 +27,14 @@ namespace Luny.Unity.Engine.Services
 				// FIXME: we probably shouldn't register all scene objects, just the ones "being used"
 
 				// Add root object
-				allObjects.Add(new LunyUnityGameObject(rootObj));
+				allObjects.Add(new UnityGameObject(rootObj));
 
 				// Add all children recursively
 				var transforms = rootObj.GetComponentsInChildren<Transform>(true);
 				foreach (var transform in transforms)
 				{
 					if (transform.gameObject != rootObj) // Skip root (already added)
-						allObjects.Add(new LunyUnityGameObject(transform.gameObject));
+						allObjects.Add(new UnityGameObject(transform.gameObject));
 				}
 			}
 
@@ -56,14 +56,14 @@ namespace Luny.Unity.Engine.Services
 			foreach (var rootObj in rootGameObjects)
 			{
 				if (rootObj.name == name)
-					return new LunyUnityGameObject(rootObj);
+					return new UnityGameObject(rootObj);
 
 				// Search children
 				var transforms = rootObj.GetComponentsInChildren<Transform>(true);
 				foreach (var transform in transforms)
 				{
 					if (transform.gameObject.name == name)
-						return new LunyUnityGameObject(transform.gameObject);
+						return new UnityGameObject(transform.gameObject);
 				}
 			}
 
@@ -78,7 +78,7 @@ namespace Luny.Unity.Engine.Services
 
 		protected override void OnServiceStartup()
 		{
-			CurrentScene = new LunyUnityScene(SceneManager.GetActiveScene());
+			CurrentScene = new UnityScene(SceneManager.GetActiveScene());
 			LunyLogger.LogInfo($"{nameof(OnServiceInitialize)}: CurrentScene={CurrentScene}", this);
 
 			InvokeOnSceneLoaded(CurrentScene);
@@ -94,7 +94,7 @@ namespace Luny.Unity.Engine.Services
 		private void OnNativeSceneLoaded(Scene scene, LoadSceneMode loadMode)
 		{
 			if (loadMode == LoadSceneMode.Single)
-				CurrentScene = new LunyUnityScene(scene);
+				CurrentScene = new UnityScene(scene);
 			else
 				throw new NotImplementedException("additive scene load not yet supported");
 

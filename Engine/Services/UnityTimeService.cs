@@ -8,7 +8,7 @@ namespace Luny.Unity.Engine.Services
 	/// Unity implementation of time service.
 	/// Uses Unity's Time.frameCount and Time.realtimeSinceStartupAsDouble for cross-platform consistency.
 	/// </summary>
-	public sealed class LunyUnityTimeService : LunyTimeServiceBase, ILunyTimeService
+	public sealed class UnityTimeService : LunyTimeServiceBase, ILunyTimeService
 	{
 		public Int64 EngineFrameCount => Time.frameCount;
 		public Double ElapsedSeconds => Time.realtimeSinceStartupAsDouble;

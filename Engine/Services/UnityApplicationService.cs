@@ -7,7 +7,7 @@ namespace Luny.Unity.Engine.Services
 	/// <summary>
 	/// Unity implementation of application control.
 	/// </summary>
-	public sealed partial class LunyUnityApplicationService : LunyApplicationServiceBase, ILunyApplicationService
+	public sealed partial class UnityApplicationService : LunyApplicationServiceBase, ILunyApplicationService
 	{
 		public Boolean IsEditor => Application.isEditor;
 

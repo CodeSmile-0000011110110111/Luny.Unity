@@ -1,4 +1,3 @@
-using Luny.Unity.Engine.Services;
 using UnityEditor;
 using UnityEngine;
 
@@ -38,9 +37,9 @@ namespace Luny.Unity.Engine
 				s_Instance = null;
 			}
 
-			if (LunyLogger.Logger is LunyUnityLogger)
+			if (LunyLogger.Logger is UnityLogger)
 			{
-				Debug.LogWarning($"{nameof(LunyLogger)} still references a {nameof(LunyUnityLogger)} instance when exiting/entering playmode.");
+				Debug.LogWarning($"{nameof(LunyLogger)} still references a {nameof(UnityLogger)} instance when exiting/entering playmode.");
 				LunyLogger.Logger = null;
 			}
 		}
