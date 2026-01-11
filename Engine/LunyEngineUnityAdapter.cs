@@ -17,7 +17,7 @@ namespace Luny.Unity.Engine
 		private static ILunyEngineNativeAdapter s_Instance;
 
 		// hold on to LunyEngine reference (not a MonoBehaviour type)
-		private ILunyEngine _lunyEngine;
+		private ILunyEngineAdapter _lunyEngine;
 
 		// Note: in builds the SceneManager's root objects list is empty in 'BeforeSceneLoad' (unlike in editor)
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
