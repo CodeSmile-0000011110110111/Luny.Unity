@@ -30,7 +30,7 @@ namespace Luny.Unity.Engine
 
 		private static void EnsureStaticFieldsAreNull()
 		{
-			LunyEngine.ResetDisposedFlag_UnityEditorOnly();
+			LunyEngine.ForceReset_UnityEditorAndUnitTestsOnly();
 
 			if (s_Instance != null)
 			{

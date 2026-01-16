@@ -47,13 +47,13 @@ namespace Luny.Unity.Engine
 			ILunyEngineNativeAdapter.ThrowIfAdapterNull(s_Instance);
 			ILunyEngineNativeAdapter.ThrowIfLunyEngineNull(_lunyEngine);
 
-			_lunyEngine.OnEngineStartup();
+			_lunyEngine.OnEngineStartup(this);
 			// => OnStartup()
 		}
 
-		private void FixedUpdate() => _lunyEngine?.OnEngineFixedStep(Time.fixedDeltaTime); // => OnFixedStep()
-		private void Update() => _lunyEngine?.OnEngineUpdate(Time.deltaTime); // => OnUpdate()
-		private void LateUpdate() => _lunyEngine?.OnEngineLateUpdate(Time.deltaTime); // => OnLateUpdate()
+		private void FixedUpdate() => _lunyEngine?.OnEngineFixedStep(Time.fixedDeltaTime, this); // => OnFixedStep()
+		private void Update() => _lunyEngine?.OnEngineUpdate(Time.deltaTime, this); // => OnUpdate()
+		private void LateUpdate() => _lunyEngine?.OnEngineLateUpdate(Time.deltaTime, this); // => OnLateUpdate()
 
 		private void OnApplicationQuit() // => OnShutdown()
 		{
