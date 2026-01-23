@@ -9,20 +9,19 @@ namespace Luny.Unity.Engine.Services
 {
 	public sealed class UnityObjectService : LunyObjectServiceBase, ILunyObjectService
 	{
-		protected override ILunyObject OnCreateEmpty(String name) => 
-			new UnityGameObject(new GameObject(name));
+		public ILunyObject CreateEmpty(String name) => new UnityGameObject(new GameObject(name));
 
-		protected override ILunyObject OnCreatePrimitive(PrimitiveType type, String name)
+		public ILunyObject CreatePrimitive(String name, LunyPrimitiveType type)
 		{
 			var go = GameObject.CreatePrimitive(type switch
 			{
-				PrimitiveType.Cube => UnityEngine.PrimitiveType.Cube,
-				PrimitiveType.Sphere => UnityEngine.PrimitiveType.Sphere,
-				PrimitiveType.Capsule => UnityEngine.PrimitiveType.Capsule,
-				PrimitiveType.Cylinder => UnityEngine.PrimitiveType.Cylinder,
-				PrimitiveType.Plane => UnityEngine.PrimitiveType.Plane,
-				PrimitiveType.Quad => UnityEngine.PrimitiveType.Quad,
-				_ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+				LunyPrimitiveType.Cube => PrimitiveType.Cube,
+				LunyPrimitiveType.Sphere => PrimitiveType.Sphere,
+				LunyPrimitiveType.Capsule => PrimitiveType.Capsule,
+				LunyPrimitiveType.Cylinder => PrimitiveType.Cylinder,
+				LunyPrimitiveType.Plane => PrimitiveType.Plane,
+				LunyPrimitiveType.Quad => PrimitiveType.Quad,
+				var _ => throw new ArgumentOutOfRangeException(nameof(type), type.ToString()),
 			});
 			go.name = name;
 			return new UnityGameObject(go);
