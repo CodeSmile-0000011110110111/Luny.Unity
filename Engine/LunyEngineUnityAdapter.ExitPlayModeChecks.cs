@@ -1,4 +1,5 @@
 using Luny.Unity.Engine.Bridge;
+using System;
 using UnityEditor;
 using UnityEngine;
 
@@ -23,7 +24,7 @@ namespace Luny.Unity.Engine
 		{
 			if (state == PlayModeStateChange.EnteredEditMode || state == PlayModeStateChange.ExitingEditMode)
 			{
-				LunyLogger.LogInfo("Entering/exiting play mode ...");
+				LunyLogger.LogInfo($"{state} ...", nameof(LunyEngineUnityAdapter));
 				EnsureStaticFieldsAreNull();
 			}
 		}
@@ -34,15 +35,23 @@ namespace Luny.Unity.Engine
 
 			if (s_Instance != null)
 			{
-				Debug.LogWarning($"{nameof(LunyEngineUnityAdapter)} _instance not null when exiting/entering playmode. Resetting ...");
+				LogWarning($"{nameof(LunyEngineUnityAdapter)} _instance not null when exiting/entering playmode. Resetting ...");
 				s_Instance = null;
 			}
 
 			if (LunyLogger.Logger is UnityLogger)
 			{
-				Debug.LogWarning($"{nameof(LunyLogger)} still references a {nameof(UnityLogger)} instance when exiting/entering playmode.");
+				LogWarning($"{nameof(LunyLogger)} still references a {nameof(UnityLogger)} instance when exiting/entering playmode.");
 				LunyLogger.Logger = null;
 			}
+		}
+
+		private static void LogWarning(String msg)
+		{
+			if (LunyLogger.Logger is UnityLogger)
+				LunyLogger.LogWarning(msg, nameof(LunyEngineUnityAdapter));
+			else
+				Debug.LogWarning(msg);
 		}
 #endif
 	}
