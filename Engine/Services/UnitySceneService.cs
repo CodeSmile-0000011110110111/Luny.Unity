@@ -15,7 +15,8 @@ namespace Luny.Unity.Engine.Services
 	{
 		public void ReloadScene() => SceneManager.LoadScene(CurrentScene?.Name, LoadSceneMode.Single);
 
-		public IReadOnlyList<ILunyObject> GetAllObjects()
+		// TODO: obsolete
+		private IReadOnlyList<ILunyObject> GetAllObjects()
 		{
 			// FIXME: temporary solution, converts every object to LunyObject without even consulting the LunyObjectRegistry
 			var scene = SceneManager.GetActiveScene();

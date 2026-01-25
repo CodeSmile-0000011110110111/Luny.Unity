@@ -15,8 +15,16 @@ namespace Luny.Unity.Engine.Bridge
 		private GameObject GO => Cast<GameObject>();
 		private static Boolean IsNativeObjectVisible(GameObject gameObject) =>
 			gameObject.TryGetComponent<Renderer>(out var renderer) && renderer.enabled;
-		public UnityGameObject(GameObject gameObject)
-			: base(gameObject, gameObject.GetEntityId(), gameObject.activeSelf, IsNativeObjectVisible(gameObject)) {}
+		public static ILunyObject ToLunyObject(GameObject gameObject)
+		{
+			var instanceId = (Int64)gameObject.GetEntityId();
+			if (TryGetCached(instanceId, out var lunyObject))
+				return lunyObject;
+
+			return new UnityGameObject(nativeObject, instanceId);
+		}
+		private UnityGameObject(GameObject gameObject, Int64 instanceId)
+			: base(gameObject, instanceId, gameObject.activeSelf, IsNativeObjectVisible(gameObject)) {}
 		protected override void DestroyNativeObject() => Object.Destroy(GO);
 		protected override Boolean IsNativeObjectValid() => GO != null;
 		protected override String GetNativeObjectName() => GO.name;
