@@ -15,31 +15,35 @@ namespace Luny.Unity.Engine.Services
 	{
 		public void ReloadScene() => SceneManager.LoadScene(CurrentScene?.Name, LoadSceneMode.Single);
 
-		// TODO: obsolete
-		private IReadOnlyList<ILunyObject> GetAllObjects()
+		public IReadOnlyList<ILunyObject> GetObjects(IReadOnlyList<String> objectNames)
 		{
-			// FIXME: temporary solution, converts every object to LunyObject without even consulting the LunyObjectRegistry
+			if (objectNames == null || objectNames.Count == 0)
+				return Array.Empty<ILunyObject>();
+
 			var scene = SceneManager.GetActiveScene();
 			var rootGameObjects = scene.GetRootGameObjects();
-			var allObjects = new List<ILunyObject>();
+			var foundObjects = new List<ILunyObject>();
+			var hashedObjectNames = new HashSet<String>(objectNames);
 
 			foreach (var rootObj in rootGameObjects)
 			{
-				// FIXME: we probably shouldn't register all scene objects, just the ones "being used"
+				if (hashedObjectNames.Contains(rootObj.name))
+					foundObjects.Add(UnityGameObject.ToLunyObject(rootObj));
 
-				// Add root object
-				allObjects.Add(new UnityGameObject(rootObj));
-
-				// Add all children recursively
+				// check all children recursively => getting their Transform is shorthand
 				var transforms = rootObj.GetComponentsInChildren<Transform>(true);
 				foreach (var transform in transforms)
 				{
-					if (transform.gameObject != rootObj) // Skip root (already added)
-						allObjects.Add(new UnityGameObject(transform.gameObject));
+					var go = transform.gameObject;
+					if (go == rootObj) // Skip root (already added)
+						continue;
+
+					if (hashedObjectNames.Contains(transform.name))
+						foundObjects.Add(UnityGameObject.ToLunyObject(go));
 				}
 			}
 
-			return allObjects;
+			return foundObjects.AsReadOnly();
 		}
 
 		public ILunyObject FindObjectByName(String name)
@@ -57,14 +61,14 @@ namespace Luny.Unity.Engine.Services
 			foreach (var rootObj in rootGameObjects)
 			{
 				if (rootObj.name == name)
-					return new UnityGameObject(rootObj);
+					return UnityGameObject.ToLunyObject(rootObj);
 
 				// Search children
 				var transforms = rootObj.GetComponentsInChildren<Transform>(true);
 				foreach (var transform in transforms)
 				{
 					if (transform.gameObject.name == name)
-						return new UnityGameObject(transform.gameObject);
+						return UnityGameObject.ToLunyObject(transform.gameObject);
 				}
 			}
 

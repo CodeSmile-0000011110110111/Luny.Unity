@@ -9,7 +9,7 @@ namespace Luny.Unity.Engine.Services
 {
 	public sealed class UnityObjectService : LunyObjectServiceBase, ILunyObjectService
 	{
-		public ILunyObject CreateEmpty(String name) => new UnityGameObject(new GameObject(name));
+		public ILunyObject CreateEmpty(String name) => UnityGameObject.ToLunyObject(new GameObject(name));
 
 		public ILunyObject CreatePrimitive(String name, LunyPrimitiveType type)
 		{
@@ -24,7 +24,7 @@ namespace Luny.Unity.Engine.Services
 				var _ => throw new ArgumentOutOfRangeException(nameof(type), type.ToString()),
 			});
 			go.name = name;
-			return new UnityGameObject(go);
+			return UnityGameObject.ToLunyObject(go);
 		}
 	}
 }
