@@ -3,6 +3,7 @@ using Luny.Engine.Services;
 using Luny.Unity.Engine.Bridge;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -15,7 +16,7 @@ namespace Luny.Unity.Engine.Services
 	{
 		public void ReloadScene() => SceneManager.LoadScene(CurrentScene?.Name, LoadSceneMode.Single);
 
-		public IReadOnlyList<ILunyObject> GetObjects(IReadOnlyList<String> objectNames)
+		public IReadOnlyList<ILunyObject> GetObjects(IReadOnlyCollection<String> objectNames)
 		{
 			if (objectNames == null || objectNames.Count == 0)
 				return Array.Empty<ILunyObject>();
@@ -23,11 +24,10 @@ namespace Luny.Unity.Engine.Services
 			var scene = SceneManager.GetActiveScene();
 			var rootGameObjects = scene.GetRootGameObjects();
 			var foundObjects = new List<ILunyObject>();
-			var hashedObjectNames = new HashSet<String>(objectNames);
 
 			foreach (var rootObj in rootGameObjects)
 			{
-				if (hashedObjectNames.Contains(rootObj.name))
+				if (objectNames.Contains(rootObj.name))
 					foundObjects.Add(UnityGameObject.ToLunyObject(rootObj));
 
 				// check all children recursively => getting their Transform is shorthand
@@ -38,7 +38,7 @@ namespace Luny.Unity.Engine.Services
 					if (go == rootObj) // Skip root (already added)
 						continue;
 
-					if (hashedObjectNames.Contains(transform.name))
+					if (objectNames.Contains(transform.name))
 						foundObjects.Add(UnityGameObject.ToLunyObject(go));
 				}
 			}
