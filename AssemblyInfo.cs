@@ -4,3 +4,4 @@
 
 // because of a Rider issue
 [assembly: InternalsVisibleTo("Luny.UnityEditor")]
+[assembly: InternalsVisibleTo("Luny-ContractTest")]

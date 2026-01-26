@@ -23,20 +23,32 @@ namespace Luny.Unity.Engine.Bridge
 			return new UnityGameObject(gameObject, instanceId);
 		}
 
+		internal static ILunyObject FindNativeObject(string name)
+		{
+			var nativeGo = GameObject.Find(name);
+			return nativeGo != null ? ToLunyObject(nativeGo) : null;
+		}
+
 		private static Boolean IsNativeObjectVisible(GameObject gameObject) =>
 			gameObject.TryGetComponent<Renderer>(out var renderer) && renderer.enabled;
 
 		private UnityGameObject(GameObject gameObject, Int64 instanceId)
-			: base(gameObject, instanceId, gameObject.activeSelf, IsNativeObjectVisible(gameObject)) {}
+			: base(gameObject, instanceId, gameObject.activeSelf, IsNativeObjectVisible(gameObject))
+		{
+			Name = gameObject.name;
+		}
 
 		protected override void DestroyNativeObject() => Object.Destroy(GO);
 		protected override Boolean IsNativeObjectValid() => GO != null;
-		protected override String GetNativeObjectName() => GO.name;
-		protected override void SetNativeObjectName(String name) => GO.name = name;
-		protected override Boolean GetNativeObjectEnabledInHierarchy() => GO.activeInHierarchy;
-		protected override Boolean GetNativeObjectEnabled() => GO.activeSelf;
-		protected override void SetNativeObjectEnabled() => GO.SetActive(true);
-		protected override void SetNativeObjectDisabled() => GO.SetActive(false);
+		protected override String GetNativeObjectName() => GO != null ? GO.name : "Destroyed";
+		protected override void SetNativeObjectName(String name)
+		{
+			if (GO != null) GO.name = name;
+		}
+		protected override Boolean GetNativeObjectEnabledInHierarchy() => GO != null && GO.activeInHierarchy;
+		protected override Boolean GetNativeObjectEnabled() => GO != null && GO.activeSelf;
+		protected override void SetNativeObjectEnabled() => GO?.SetActive(true);
+		protected override void SetNativeObjectDisabled() => GO?.SetActive(false);
 
 		protected override void SetNativeObjectVisible()
 		{

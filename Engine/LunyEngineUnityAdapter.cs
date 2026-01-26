@@ -14,16 +14,19 @@ namespace Luny.Unity.Engine
 	internal sealed partial class LunyEngineUnityAdapter : MonoBehaviour, ILunyEngineNativeAdapter
 	{
 		// intentionally remains private - user code must use LunyEngine.Instance!
-		private static ILunyEngineNativeAdapter s_Instance;
+		internal static ILunyEngineNativeAdapter s_Instance;
 
 		// hold on to LunyEngine reference (not a MonoBehaviour type)
 		private ILunyEngineLifecycle _lunyEngine;
+
+		internal static void ForceReset_UnitTestsOnly() => s_Instance = null;
 
 		// Note: in builds the SceneManager's root objects list is empty in 'BeforeSceneLoad' (unlike in editor)
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 		private static void OnBeforeSceneLoad() => Initialize();
 
-		private static void Initialize()
+		// splitting ctor and Initialize prevents stackoverflows for cases where Instance is accessed from within ctor
+		internal static void Initialize()
 		{
 			// Logging comes first, we don't want to miss anything
 			LunyLogger.Logger = new UnityLogger();
@@ -37,7 +40,12 @@ namespace Luny.Unity.Engine
 			LunyTraceLogger.LogInfoInitialized(typeof(LunyEngineUnityAdapter));
 		}
 
-		private void Awake() => _lunyEngine = ILunyEngineNativeAdapter.CreateEngine(ref s_Instance, this);
+		private void Awake()
+		{
+			Console.WriteLine("[DEBUG_LOG] LunyEngineUnityAdapter.Awake entry");
+			_lunyEngine = ILunyEngineNativeAdapter.CreateEngine(ref s_Instance, this);
+			Console.WriteLine($"[DEBUG_LOG] LunyEngineUnityAdapter.Awake exit - LunyEngine.Instance is null: {LunyEngine.Instance == null}");
+		}
 
 		private void Start()
 		{
