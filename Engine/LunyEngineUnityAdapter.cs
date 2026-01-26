@@ -13,6 +13,8 @@ namespace Luny.Unity.Engine
 	[DisallowMultipleComponent]
 	internal sealed partial class LunyEngineUnityAdapter : MonoBehaviour, ILunyEngineNativeAdapter
 	{
+		public String EngineName => "Unity";
+
 		// intentionally remains private - user code must use LunyEngine.Instance!
 		internal static ILunyEngineNativeAdapter s_Instance;
 
@@ -42,9 +44,7 @@ namespace Luny.Unity.Engine
 
 		private void Awake()
 		{
-			Console.WriteLine("[DEBUG_LOG] LunyEngineUnityAdapter.Awake entry");
 			_lunyEngine = ILunyEngineNativeAdapter.CreateEngine(ref s_Instance, this);
-			Console.WriteLine($"[DEBUG_LOG] LunyEngineUnityAdapter.Awake exit - LunyEngine.Instance is null: {LunyEngine.Instance == null}");
 		}
 
 		private void Start()
