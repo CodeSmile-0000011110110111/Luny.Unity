@@ -11,24 +11,17 @@ namespace Luny.Unity.Engine
 	[DefaultExecutionOrder(Int32.MinValue)] // Run before all other scripts
 	[AddComponentMenu("GameObject/")] // Do not list in "Add Component" menu
 	[DisallowMultipleComponent]
-	internal sealed partial class LunyEngineUnityAdapter : MonoBehaviour, ILunyEngineNativeAdapter
+	internal sealed partial class LunyEngineUnityAdapter : MonoBehaviour, ILunyEngineNativeAdapter, ILunyEngineNativeAdapterInternal
 	{
-		public String EngineName => "Unity";
-
 		// intentionally remains private - user code must use LunyEngine.Instance!
 		internal static ILunyEngineNativeAdapter s_Instance;
 
 		// hold on to LunyEngine reference (not a MonoBehaviour type)
 		private ILunyEngineLifecycle _lunyEngine;
-
-		internal static void ForceReset_UnitTestsOnly() => s_Instance = null;
-
-		// Note: in builds the SceneManager's root objects list is empty in 'BeforeSceneLoad' (unlike in editor)
-		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-		private static void OnBeforeSceneLoad() => Initialize();
+		public NativeEngine Engine => NativeEngine.Unity;
 
 		// splitting ctor and Initialize prevents stackoverflows for cases where Instance is accessed from within ctor
-		internal static void Initialize()
+		internal static LunyEngineUnityAdapter Initialize()
 		{
 			// Logging comes first, we don't want to miss anything
 			LunyLogger.Logger = new UnityLogger();
@@ -38,14 +31,19 @@ namespace Luny.Unity.Engine
 			DontDestroyOnLoad(go);
 
 			// Note: Awake and OnEnable run within AddComponent
-			go.AddComponent<LunyEngineUnityAdapter>();
+			var adapter = go.AddComponent<LunyEngineUnityAdapter>();
 			LunyTraceLogger.LogInfoInitialized(typeof(LunyEngineUnityAdapter));
+
+			return adapter;
 		}
 
-		private void Awake()
-		{
-			_lunyEngine = ILunyEngineNativeAdapter.CreateEngine(ref s_Instance, this);
-		}
+		// Note: in builds the SceneManager's root objects list is empty in 'BeforeSceneLoad' (unlike in editor)
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+		private static void OnBeforeSceneLoad() => Initialize();
+
+		public void SimulateQuit_UnitTestOnly() => OnApplicationQuit();
+
+		private void Awake() => _lunyEngine = ILunyEngineNativeAdapter.CreateEngine(ref s_Instance, this);
 
 		private void Start()
 		{
