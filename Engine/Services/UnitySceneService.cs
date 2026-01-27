@@ -14,7 +14,7 @@ namespace Luny.Unity.Engine.Services
 	/// </summary>
 	public sealed class UnitySceneService : LunySceneServiceBase, ILunySceneService
 	{
-		public void ReloadScene() => SceneManager.LoadScene(CurrentScene?.Name, LoadSceneMode.Single);
+		public void ReloadScene() => SceneManager.LoadScene(CurrentScene?.Name);
 
 		public IReadOnlyList<ILunyObject> GetObjects(IReadOnlyCollection<String> objectNames)
 		{
