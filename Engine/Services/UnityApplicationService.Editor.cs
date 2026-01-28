@@ -1,4 +1,7 @@
 ﻿using System.Diagnostics;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Luny.Unity.Engine.Services
 {

@@ -1,8 +1,13 @@
+#if UNITY_EDITOR
+using Luny.Unity.Engine.Bridge;
+using UnityEditor;
+using UnityEngine;
+using System;
+
 namespace Luny.Unity.Engine
 {
 	internal sealed partial class LunyEngineUnityAdapter
 	{
-#if UNITY_EDITOR
 		// precautionary verification that static fields have been set to null
 		// this ensures proper "disabled domain reload" behaviour
 		[InitializeOnLoadMethod]
@@ -48,6 +53,6 @@ namespace Luny.Unity.Engine
 			else
 				Debug.LogWarning(msg);
 		}
-#endif
 	}
 }
+#endif
