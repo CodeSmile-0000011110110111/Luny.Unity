@@ -11,7 +11,7 @@ namespace Luny.Unity.Engine
 	[DefaultExecutionOrder(Int32.MinValue)] // Run before all other scripts
 	[AddComponentMenu("GameObject/")] // Do not list in "Add Component" menu
 	[DisallowMultipleComponent]
-	internal sealed partial class LunyEngineUnityAdapter : MonoBehaviour, ILunyEngineNativeAdapter, ILunyEngineNativeAdapterInternal
+	internal sealed class LunyEngineUnityAdapter : MonoBehaviour, ILunyEngineNativeAdapter, ILunyEngineNativeAdapterInternal
 	{
 		// intentionally remains private - user code must use LunyEngine.Instance!
 		internal static ILunyEngineNativeAdapter s_Instance;
