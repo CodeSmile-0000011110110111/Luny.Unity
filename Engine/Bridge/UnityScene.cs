@@ -9,6 +9,6 @@ namespace Luny.Unity.Engine.Bridge
 		public override String Name => Cast<Scene>().name;
 
 		public UnityScene(Scene nativeScene)
-			: base(nativeScene, new UnityPath(nativeScene.path, true)) {}
+			: base(nativeScene, LunyPath.FromNative(nativeScene.path)) {}
 	}
 }
