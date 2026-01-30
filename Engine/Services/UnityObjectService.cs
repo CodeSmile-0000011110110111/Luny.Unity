@@ -26,5 +26,8 @@ namespace Luny.Unity.Engine.Services
 			go.name = name;
 			return UnityGameObject.ToLunyObject(go);
 		}
+
+		public ILunyObject CreateFromPrefab(ILunyPrefab prefab) =>
+			throw new NotImplementedException($"{nameof(UnityObjectService)}.{nameof(CreateFromPrefab)}");
 	}
 }
