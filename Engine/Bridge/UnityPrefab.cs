@@ -21,6 +21,11 @@ namespace Luny.Unity.Engine.Bridge
 
 		public T Cast<T>() where T : class => _prefab as T;
 
-		public GameObject Instantiate() => UnityEngine.Object.Instantiate(_prefab);
+		public GameObject Instantiate()
+		{
+			var instance = UnityEngine.Object.Instantiate(_prefab);
+			instance.name = instance.name.Replace("(Clone)", "");
+			return instance;
+		}
 	}
 }

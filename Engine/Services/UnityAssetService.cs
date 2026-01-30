@@ -42,7 +42,8 @@ namespace Luny.Unity.Engine.Services
 			if (typeof(T) == typeof(ILunyPrefab))
 			{
 				var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
-				go.name = $"Missing: {path}";
+				//go.hideFlags = HideFlags.HideInHierarchy | HideFlags.DontSave;
+				go.name = $"Missing '{path}'";
 				return new UnityPrefab(go, path) as T;
 			}
 			return null;

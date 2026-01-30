@@ -1,4 +1,3 @@
-using Luny.Engine.Identity;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -19,7 +18,7 @@ namespace Luny.UnityEditor.Linking
 			var details = new List<PreserveDetails>();
 
 			var preserveScripts = new Dictionary<String, List<String>>();
-			foreach (var scriptType in LunyTypeDiscovery.FindAll<T>())
+			foreach (var scriptType in TypeDiscovery.FindAll<T>())
 			{
 				var assemblyName = scriptType.Assembly.GetName().Name;
 				if (preserveScripts.ContainsKey(assemblyName) == false)
