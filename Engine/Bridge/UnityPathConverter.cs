@@ -33,7 +33,7 @@ namespace Luny.Unity.Engine.Bridge
 			{
 				// Assets/Resources/Luny/ is the preferred location for Luny assets in Unity
 				LunyPathType.Save => PersistentDataPrefix + agnosticPath,
-				_ => agnosticPath
+				var _ => agnosticPath,
 			};
 		}
 	}

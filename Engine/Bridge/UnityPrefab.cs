@@ -2,6 +2,7 @@ using Luny.Engine.Bridge;
 using Luny.Engine.Bridge.Identity;
 using System;
 using UnityEngine;
+using Object = System.Object;
 
 namespace Luny.Unity.Engine.Bridge
 {
@@ -10,7 +11,7 @@ namespace Luny.Unity.Engine.Bridge
 		private readonly GameObject _prefab;
 
 		public LunyAssetID AssetID { get; internal set; }
-		public System.Object NativeAsset => _prefab;
+		public Object NativeAsset => _prefab;
 		public LunyAssetPath AssetPath { get; }
 
 		public UnityPrefab(GameObject prefab, LunyAssetPath assetPath)
