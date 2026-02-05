@@ -11,7 +11,7 @@ namespace Luny.Unity.Engine.Services
 	{
 		protected override void OnServiceInitialize() => LunyPath.Converter = new UnityPathConverter();
 
-		protected override T LoadNative<T>(LunyAssetPath path)
+		protected override T LoadAsset<T>(LunyAssetPath path)
 		{
 			var nativePath = path.NativePath;
 			var asset = Resources.Load(nativePath);
@@ -25,7 +25,7 @@ namespace Luny.Unity.Engine.Services
 			return null;
 		}
 
-		protected override void UnloadNative(ILunyAsset asset)
+		protected override void UnloadAsset(ILunyAsset asset)
 		{
 			// Resources.UnloadAsset is only for specific types, for GameObjects we typically don't unload individual prefabs like this.
 			// In real engine, we'd use Resources.UnloadUnusedAssets().
