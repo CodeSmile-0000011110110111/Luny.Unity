@@ -53,9 +53,9 @@ namespace Luny.Unity.Engine
 			ILunyEngineNativeAdapter.Startup(s_Instance, _lunyEngine); // => OnStartup()
 		}
 
-		private void FixedUpdate() => ILunyEngineNativeAdapter.FixedStep(Time.fixedDeltaTime, s_Instance, _lunyEngine); // => OnFixedStep()
-		private void Update() => ILunyEngineNativeAdapter.Update(Time.deltaTime, s_Instance, _lunyEngine); // => OnUpdate()
-		private void LateUpdate() => ILunyEngineNativeAdapter.LateUpdate(Time.deltaTime, s_Instance, _lunyEngine); // => OnLateUpdate()
+		private void FixedUpdate() => ILunyEngineNativeAdapter.Heartbeat(Time.fixedDeltaTime, s_Instance, _lunyEngine); // => OnFixedStep()
+		private void Update() => ILunyEngineNativeAdapter.FrameUpdate(Time.deltaTime, s_Instance, _lunyEngine); // => OnUpdate()
+		private void LateUpdate() => ILunyEngineNativeAdapter.FrameLateUpdate(s_Instance, _lunyEngine); // => OnLateUpdate()
 
 		private void OnApplicationQuit()
 		{
