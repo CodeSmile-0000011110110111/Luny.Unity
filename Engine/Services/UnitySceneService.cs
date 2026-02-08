@@ -14,9 +14,9 @@ namespace Luny.Unity.Engine.Services
 	/// </summary>
 	public sealed class UnitySceneService : LunySceneServiceBase, ILunySceneService
 	{
-		public void ReloadScene() => SceneManager.LoadScene(CurrentScene?.Name);
+		public override void ReloadScene() => SceneManager.LoadScene(CurrentScene?.Name);
 
-		public IReadOnlyList<ILunyObject> GetObjects(IReadOnlyCollection<String> objectNames)
+		public override IReadOnlyList<ILunyObject> GetObjects(IReadOnlyCollection<String> objectNames)
 		{
 			if (objectNames == null || objectNames.Count == 0)
 				return Array.Empty<ILunyObject>();
@@ -46,7 +46,7 @@ namespace Luny.Unity.Engine.Services
 			return foundObjects.AsReadOnly();
 		}
 
-		public ILunyObject FindObjectByName(String name)
+		public override ILunyObject FindObjectByName(String name)
 		{
 			if (String.IsNullOrEmpty(name))
 				return null;

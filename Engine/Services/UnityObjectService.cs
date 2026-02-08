@@ -9,9 +9,9 @@ namespace Luny.Unity.Engine.Services
 {
 	public sealed class UnityObjectService : LunyObjectServiceBase, ILunyObjectService
 	{
-		public ILunyObject CreateEmpty(String name) => UnityGameObject.ToLunyObject(new GameObject(name));
+		public override ILunyObject CreateEmpty(String name) => UnityGameObject.ToLunyObject(new GameObject(name));
 
-		public ILunyObject CreatePrimitive(String name, LunyPrimitiveType type)
+		public override ILunyObject CreatePrimitive(String name, LunyPrimitiveType type)
 		{
 			var go = GameObject.CreatePrimitive(type switch
 			{
@@ -27,7 +27,7 @@ namespace Luny.Unity.Engine.Services
 			return UnityGameObject.ToLunyObject(go);
 		}
 
-		public ILunyObject CreateFromPrefab(ILunyPrefab prefab)
+		public override ILunyObject CreateFromPrefab(ILunyPrefab prefab)
 		{
 			if (prefab is not UnityPrefab unityPrefab)
 				throw new ArgumentException($"Prefab must be of type {nameof(UnityPrefab)}", nameof(prefab));

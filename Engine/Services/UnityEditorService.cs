@@ -8,7 +8,7 @@ namespace Luny.Unity.Engine.Services
 	/// </summary>
 	public sealed class UnityEditorService : LunyEditorServiceBase, ILunyEditorService
 	{
-		public void PausePlayer() => Debug.Break();
+		public override void PausePlayer() => Debug.Break();
 		protected override void OnServiceInitialize() {}
 
 		protected override void OnServiceStartup() {}

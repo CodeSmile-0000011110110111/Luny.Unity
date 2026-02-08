@@ -10,8 +10,8 @@ namespace Luny.Unity.Engine.Services
 	/// </summary>
 	public sealed class UnityTimeService : LunyTimeServiceBase, ILunyTimeService
 	{
-		public Int64 EngineFrameCount => Time.frameCount;
-		public Double ElapsedSeconds => Time.realtimeSinceStartupAsDouble;
+		public override Int64 EngineFrameCount => Time.frameCount;
+		public override Double ElapsedSeconds => Time.realtimeSinceStartupAsDouble;
 		protected override void OnServiceInitialize() {}
 		protected override void OnServiceStartup() {}
 		protected override void OnServiceShutdown() {}

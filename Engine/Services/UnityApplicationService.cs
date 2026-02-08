@@ -9,11 +9,11 @@ namespace Luny.Unity.Engine.Services
 	/// </summary>
 	public sealed partial class UnityApplicationService : LunyApplicationServiceBase, ILunyApplicationService
 	{
-		public Boolean IsEditor => Application.isEditor;
+		public override Boolean IsEditor => Application.isEditor;
 
-		public Boolean IsPlaying => Application.isPlaying;
+		public override Boolean IsPlaying => Application.isPlaying;
 
-		public void Quit(Int32 exitCode = 0)
+		public override void Quit(Int32 exitCode = 0)
 		{
 			Application.Quit(exitCode);
 			ExitPlayModeWhenInEditor();
