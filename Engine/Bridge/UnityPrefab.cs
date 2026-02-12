@@ -1,32 +1,21 @@
 using Luny.Engine.Bridge;
-using Luny.Engine.Bridge.Identity;
-using System;
 using UnityEngine;
-using Object = System.Object;
 
 namespace Luny.Unity.Engine.Bridge
 {
-	public sealed class UnityPrefab : ILunyPrefab
+	public sealed class UnityPrefab : LunyPrefab
 	{
-		private readonly GameObject _prefab;
-
-		public LunyAssetID AssetID { get; internal set; }
-		public Object NativeAsset => _prefab;
-		public LunyAssetPath AssetPath { get; }
-
 		public UnityPrefab(GameObject prefab, LunyAssetPath assetPath)
-		{
-			_prefab = prefab ?? throw new ArgumentNullException(nameof(prefab));
-			AssetPath = assetPath ?? throw new ArgumentNullException(nameof(assetPath));
-		}
+			: base(prefab, assetPath) {}
 
-		public T Cast<T>() where T : class => _prefab as T;
-
-		public GameObject Instantiate()
+		public override T Instantiate<T>()
 		{
-			var instance = UnityEngine.Object.Instantiate(_prefab);
+			var unityPrefab = Cast<GameObject>();
+			var instance = Object.Instantiate(unityPrefab);
 			instance.name = instance.name.Replace("(Clone)", "");
-			return instance;
+			return instance as T;
 		}
+
+		public GameObject Instantiate() => Instantiate<GameObject>();
 	}
 }

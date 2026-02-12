@@ -82,13 +82,17 @@ namespace Luny.Unity.Engine.Services
 			else
 				throw new NotImplementedException("additive scene load not yet supported");
 
+			LunyLogger.LogInfo("-----------------------------------------------------------------------------------------------------", this);
 			LunyLogger.LogInfo($"{nameof(OnNativeSceneLoaded)}: {CurrentScene} => {ToString()}", this);
+			LunyLogger.LogInfo("-----------------------------------------------------------------------------------------------------", this);
 			InvokeOnSceneLoaded(CurrentScene);
 		}
 
 		private void OnNativeSceneUnloaded(Scene scene)
 		{
+			LunyLogger.LogInfo("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", this);
 			LunyLogger.LogInfo($"{nameof(OnNativeSceneUnloaded)}: {CurrentScene} => {ToString()}", this);
+			LunyLogger.LogInfo("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~", this);
 			if (CurrentScene?.Name == scene.name)
 			{
 				InvokeOnSceneUnloaded(CurrentScene);

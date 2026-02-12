@@ -72,6 +72,7 @@ namespace Luny.Unity.Engine
 
 			LunyTraceLogger.LogInfoDestroyed(this);
 			ILunyEngineNativeAdapter.EndLogging();
+			GC.SuppressFinalize(this);
 		}
 
 		~LunyEngineUnityAdapter() => LunyTraceLogger.LogInfoFinalized(this);
