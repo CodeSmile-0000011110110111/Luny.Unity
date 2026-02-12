@@ -44,8 +44,8 @@ namespace Luny.Unity.Engine.Services
 				var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
 				//go.hideFlags = HideFlags.HideInHierarchy | HideFlags.DontSave;
 				go.name = $"Missing '{path}'";
-				go.AddComponent<BoxCollider>();
-				go.AddComponent<Rigidbody>();
+				// go.AddComponent<BoxCollider>();
+				// go.AddComponent<Rigidbody>();
 				return new UnityPrefab(go, path) as T;
 			}
 			return null;
