@@ -1,5 +1,6 @@
 using Luny.Engine.Bridge;
 using System;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -11,9 +12,30 @@ namespace Luny.Unity.Engine.Bridge
 	internal sealed class UnityGameObject : LunyObject
 	{
 		private Renderer _renderer;
-		private Renderer Renderer =>
-			_renderer != null ? _renderer : IsNativeObjectValid() && GO.TryGetComponent(out _renderer) ? _renderer : null;
-		private GameObject GO => Cast<GameObject>();
+		private Renderer Renderer
+		{
+			get
+			{
+				if (_renderer != null)
+					return _renderer;
+
+				var go = GO;
+				if (go == null)
+					return null;
+
+				return go.TryGetComponent(out _renderer) ? _renderer : null;
+			}
+		}
+		private GameObject GO
+		{
+			get
+			{
+				if (!IsNativeObjectValid())
+					return null;
+
+				return (GameObject)NativeObject;
+			}
+		}
 
 		public static ILunyObject ToLunyObject(GameObject gameObject)
 		{
@@ -26,51 +48,103 @@ namespace Luny.Unity.Engine.Bridge
 
 		internal static ILunyObject FindNativeObject(String name)
 		{
-			var nativeGo = GameObject.Find(name);
-			return nativeGo != null ? ToLunyObject(nativeGo) : null;
+			var foundObject = GameObject.Find(name);
+			if (foundObject == null)
+				return null;
+
+			return ToLunyObject(foundObject);
 		}
 
-		private static Boolean IsNativeObjectVisible(GameObject gameObject) =>
-			gameObject != null && gameObject.TryGetComponent<Renderer>(out var renderer) && renderer.enabled;
+		private static Boolean IsNativeObjectVisible(GameObject gameObject)
+		{
+			if (gameObject == null)
+				return false;
+
+			return gameObject.TryGetComponent<Renderer>(out var renderer) && renderer.enabled;
+		}
 
 		private UnityGameObject(GameObject gameObject, Int64 instanceId)
 			: base(gameObject, instanceId, gameObject.activeSelf, IsNativeObjectVisible(gameObject)) => Name = gameObject.name;
 
 		protected override void DestroyNativeObject() => Object.Destroy(GO); // Destroy handles null parameters
-		protected override Boolean IsNativeObjectValid() => GO != null;
-		protected override String GetNativeObjectName() => IsNativeObjectValid() ? GO.name : "<null>";
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected override Boolean IsNativeObjectValid()
+		{
+			var go = NativeObject as GameObject; // must use NativeObject here to avoid stackoverflow
+			return go != null;
+		}
+
+		protected override String GetNativeObjectName()
+		{
+			var go = GO;
+			if (go == null)
+				return "<null>";
+
+			return go.name;
+		}
 
 		protected override void SetNativeObjectName(String name)
 		{
-			if (IsNativeObjectValid())
-				GO.name = name;
+			var go = GO;
+			if (go == null)
+				return;
+
+			go.name = name;
 		}
 
-		protected override Boolean GetNativeObjectEnabledInHierarchy() => IsNativeObjectValid() && GO.activeInHierarchy;
-		protected override Boolean GetNativeObjectEnabled() => IsNativeObjectValid() && GO.activeSelf;
+		protected override Boolean GetNativeObjectEnabledInHierarchy()
+		{
+			var go = GO;
+			if (go == null)
+				return false;
+
+			return go.activeInHierarchy;
+		}
+
+		protected override Boolean GetNativeObjectEnabled()
+		{
+			var go = GO;
+			if (go == null)
+				return false;
+
+			return go.activeSelf;
+		}
 
 		protected override void SetNativeObjectEnabled()
 		{
-			if (IsNativeObjectValid())
-				GO.SetActive(true);
+			var go = GO;
+			if (go == null)
+				return;
+
+			go.SetActive(true);
 		}
 
 		protected override void SetNativeObjectDisabled()
 		{
-			if (IsNativeObjectValid())
-				GO?.SetActive(false);
+			var go = GO;
+			if (go == null)
+				return;
+
+			go.SetActive(false);
 		}
 
 		protected override void SetNativeObjectVisible()
 		{
-			if (Renderer != null)
-				Renderer.enabled = true;
+			var renderer = Renderer;
+			if (renderer == null)
+				return;
+
+			renderer.enabled = true;
 		}
 
 		protected override void SetNativeObjectInvisible()
 		{
-			if (Renderer != null)
-				Renderer.enabled = false;
+			var renderer = Renderer;
+			if (renderer == null)
+				return;
+
+			renderer.enabled = false;
 		}
 	}
 }
