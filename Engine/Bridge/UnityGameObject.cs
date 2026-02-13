@@ -11,7 +11,8 @@ namespace Luny.Unity.Engine.Bridge
 	internal sealed class UnityGameObject : LunyObject
 	{
 		private Renderer _renderer;
-		private Renderer Renderer => _renderer != null ? _renderer : GO.TryGetComponent(out _renderer) ? _renderer : null;
+		private Renderer Renderer =>
+			_renderer != null ? _renderer : IsNativeObjectValid() && GO.TryGetComponent(out _renderer) ? _renderer : null;
 		private GameObject GO => Cast<GameObject>();
 
 		public static ILunyObject ToLunyObject(GameObject gameObject)
@@ -30,25 +31,35 @@ namespace Luny.Unity.Engine.Bridge
 		}
 
 		private static Boolean IsNativeObjectVisible(GameObject gameObject) =>
-			gameObject.TryGetComponent<Renderer>(out var renderer) && renderer.enabled;
+			gameObject != null && gameObject.TryGetComponent<Renderer>(out var renderer) && renderer.enabled;
 
 		private UnityGameObject(GameObject gameObject, Int64 instanceId)
 			: base(gameObject, instanceId, gameObject.activeSelf, IsNativeObjectVisible(gameObject)) => Name = gameObject.name;
 
-		protected override void DestroyNativeObject() => Object.Destroy(GO);
+		protected override void DestroyNativeObject() => Object.Destroy(GO); // Destroy handles null parameters
 		protected override Boolean IsNativeObjectValid() => GO != null;
-		protected override String GetNativeObjectName() => GO != null ? GO.name : "Destroyed";
+		protected override String GetNativeObjectName() => IsNativeObjectValid() ? GO.name : "<null>";
 
 		protected override void SetNativeObjectName(String name)
 		{
-			if (GO != null)
+			if (IsNativeObjectValid())
 				GO.name = name;
 		}
 
-		protected override Boolean GetNativeObjectEnabledInHierarchy() => GO != null && GO.activeInHierarchy;
-		protected override Boolean GetNativeObjectEnabled() => GO != null && GO.activeSelf;
-		protected override void SetNativeObjectEnabled() => GO?.SetActive(true);
-		protected override void SetNativeObjectDisabled() => GO?.SetActive(false);
+		protected override Boolean GetNativeObjectEnabledInHierarchy() => IsNativeObjectValid() && GO.activeInHierarchy;
+		protected override Boolean GetNativeObjectEnabled() => IsNativeObjectValid() && GO.activeSelf;
+
+		protected override void SetNativeObjectEnabled()
+		{
+			if (IsNativeObjectValid())
+				GO.SetActive(true);
+		}
+
+		protected override void SetNativeObjectDisabled()
+		{
+			if (IsNativeObjectValid())
+				GO?.SetActive(false);
+		}
 
 		protected override void SetNativeObjectVisible()
 		{
