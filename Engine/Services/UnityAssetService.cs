@@ -41,11 +41,12 @@ namespace Luny.Unity.Engine.Services
 		{
 			if (typeof(T) == typeof(ILunyPrefab))
 			{
+				// TODO: load an actual prefab asset because this creates duplicates in the scene ("prefab" + instance)
 				var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
 				//go.hideFlags = HideFlags.HideInHierarchy | HideFlags.DontSave;
-				go.name = $"Missing '{path}'";
-				// go.AddComponent<BoxCollider>();
-				// go.AddComponent<Rigidbody>();
+				go.name = $"Not found: {path}";
+				go.AddComponent<BoxCollider>();
+				go.AddComponent<Rigidbody>();
 				return new UnityPrefab(go, path) as T;
 			}
 			return null;
