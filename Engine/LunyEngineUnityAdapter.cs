@@ -1,5 +1,5 @@
 ﻿using Luny.Engine;
-using Luny.Engine.Bridge.Enums;
+using Luny.Engine.Bridge;
 using Luny.Unity.Engine.Bridge;
 using System;
 using UnityEngine;

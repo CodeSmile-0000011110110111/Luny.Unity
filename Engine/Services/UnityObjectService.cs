@@ -1,5 +1,4 @@
 ﻿using Luny.Engine.Bridge;
-using Luny.Engine.Bridge.Enums;
 using Luny.Engine.Services;
 using Luny.Unity.Engine.Bridge;
 using System;
