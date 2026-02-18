@@ -88,7 +88,7 @@ namespace Luny.Unity.Engine.Services
 		/// <summary>
 		/// Simulates axis input for testing. In real Unity, this comes from InputSystem callbacks.
 		/// </summary>
-		internal void SimulateAxisInput(String actionName, LunyVector2 value) => RaiseDirectionalInput(actionName, value);
+		internal void SimulateDirectionalInput(String actionName, LunyVector2 value) => RaiseDirectionalInput(actionName, value);
 
 		/// <summary>
 		/// Simulates button press for testing. In real Unity, this comes from InputSystem callbacks.
