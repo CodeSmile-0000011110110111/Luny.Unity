@@ -59,8 +59,7 @@ namespace Luny.Unity.Engine.Services
 		{
 			var layout = ctx.action.expectedControlType;
 			var type = ctx.action.type;
-
-			LunyLogger.LogInfo($"Performed: {ctx.action.name}, {ctx}", this);
+			//LunyLogger.LogInfo($"Performed: {ctx.action.name}, {ctx}", this);
 
 			if (layout == "Vector2" || String.IsNullOrEmpty(layout) && type == InputActionType.Value)
 			{
@@ -77,8 +76,7 @@ namespace Luny.Unity.Engine.Services
 		{
 			var layout = ctx.action.expectedControlType;
 			var type = ctx.action.type;
-
-			LunyLogger.LogInfo($"Canceled: {ctx.action.name}, {ctx}", this);
+			//LunyLogger.LogInfo($"Canceled: {ctx.action.name}, {ctx}", this);
 
 			if (layout == "Vector2" || String.IsNullOrEmpty(layout) && type == InputActionType.Value)
 				RaiseDirectionalInput(ctx.action.name, LunyVector2.Zero);
