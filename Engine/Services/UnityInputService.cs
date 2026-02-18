@@ -1,6 +1,6 @@
-﻿using Luny.Engine.Bridge;
-using Luny.Engine.Services;
+﻿using Luny.Engine.Services;
 using System;
+using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace Luny.Unity.Engine.Services
@@ -20,15 +20,22 @@ namespace Luny.Unity.Engine.Services
 				return;
 			}
 
+			LunyLogger.LogInfo($"Using InputActionAsset: {asset.name}, enabled: {asset.enabled}", this);
 			foreach (var map in asset.actionMaps)
 			{
+				if (map.name == "Player")
+					map.Enable();
+				else
+					map.Disable();
+
+				LunyLogger.LogInfo($"== Processing InputActionMap: {map.name}, enabled: {map.enabled}", this);
 				foreach (var action in map.actions)
 				{
+					LunyLogger.LogInfo($"---- Registering InputAction: {action.name}, enabled: {action.enabled}", this);
 					action.performed += OnActionPerformed;
 					action.canceled += OnActionCanceled;
 				}
 			}
-			asset.Enable();
 		}
 
 		protected override void OnServiceShutdown()
@@ -50,12 +57,14 @@ namespace Luny.Unity.Engine.Services
 
 		private void OnActionPerformed(InputAction.CallbackContext ctx)
 		{
-			var layout = ctx.action.expectedControlLayout;
+			var layout = ctx.action.expectedControlType;
 			var type = ctx.action.type;
 
-			if (layout == "Vector2" || (String.IsNullOrEmpty(layout) && type == InputActionType.Value))
+			LunyLogger.LogInfo($"Performed: {ctx.action.name}, {ctx}", this);
+
+			if (layout == "Vector2" || String.IsNullOrEmpty(layout) && type == InputActionType.Value)
 			{
-				var vec = ctx.ReadValue<UnityEngine.Vector2>();
+				var vec = ctx.ReadValue<Vector2>();
 				RaiseDirectionalInput(ctx.action.name, new LunyVector2(vec.x, vec.y));
 			}
 			else if (layout == "Button" || layout == "Axis" || type == InputActionType.Button)
@@ -66,10 +75,12 @@ namespace Luny.Unity.Engine.Services
 
 		private void OnActionCanceled(InputAction.CallbackContext ctx)
 		{
-			var layout = ctx.action.expectedControlLayout;
+			var layout = ctx.action.expectedControlType;
 			var type = ctx.action.type;
 
-			if (layout == "Vector2" || (String.IsNullOrEmpty(layout) && type == InputActionType.Value))
+			LunyLogger.LogInfo($"Canceled: {ctx.action.name}, {ctx}", this);
+
+			if (layout == "Vector2" || String.IsNullOrEmpty(layout) && type == InputActionType.Value)
 				RaiseDirectionalInput(ctx.action.name, LunyVector2.Zero);
 			else if (layout == "Button" || layout == "Axis" || type == InputActionType.Button)
 				RaiseButtonInput(ctx.action.name, false, 0f);
@@ -79,8 +90,7 @@ namespace Luny.Unity.Engine.Services
 		/// <summary>
 		/// Simulates axis input for testing. In real Unity, this comes from InputSystem callbacks.
 		/// </summary>
-		internal void SimulateAxisInput(String actionName, LunyVector2 value) =>
-			RaiseDirectionalInput(actionName, value);
+		internal void SimulateAxisInput(String actionName, LunyVector2 value) => RaiseDirectionalInput(actionName, value);
 
 		/// <summary>
 		/// Simulates button press for testing. In real Unity, this comes from InputSystem callbacks.
