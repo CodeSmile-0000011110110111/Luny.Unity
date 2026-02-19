@@ -62,15 +62,17 @@ namespace Luny.Unity.Engine.Services
 			var type = ctx.action.type;
 			//LunyLogger.LogInfo($"Performed: {ctx.action.name}, {ctx}", this);
 
-			if (layout == "Vector2" || String.IsNullOrEmpty(layout) && type == InputActionType.Value)
+			if (layout == "Vector2" || type == InputActionType.Value && String.IsNullOrEmpty(layout))
 			{
 				var vec = ctx.ReadValue<Vector2>();
-				RaiseDirectionalInput(ctx.action.name, new LunyVector2(vec.x, vec.y));
+				SetDirectionalInput(ctx.action.name, new LunyVector2(vec.x, vec.y));
 			}
-			else if (layout == "Button" || layout == "Axis" || type == InputActionType.Button)
-				RaiseButtonInput(ctx.action.name, true, ctx.ReadValue<Single>());
+			else if (layout == "Axis")
+				SetAxisInput(ctx.action.name, ctx.ReadValue<Single>());
+			else if (type == InputActionType.Button || layout == "Button")
+				SetButtonInput(ctx.action.name, true, ctx.ReadValue<Single>());
 			else
-				LunyLogger.LogInfo($"{nameof(UnityInputService)}: Unsupported control layout '{layout}' for action '{ctx.action.name}'");
+				LunyLogger.LogInfo($"Unsupported control layout '{layout}' for action '{ctx.action.name}'", this);
 		}
 
 		private void OnActionCanceled(InputAction.CallbackContext ctx)
@@ -79,22 +81,12 @@ namespace Luny.Unity.Engine.Services
 			var type = ctx.action.type;
 			//LunyLogger.LogInfo($"Canceled: {ctx.action.name}, {ctx}", this);
 
-			if (layout == "Vector2" || String.IsNullOrEmpty(layout) && type == InputActionType.Value)
-				RaiseDirectionalInput(ctx.action.name, LunyVector2.Zero);
-			else if (layout == "Button" || layout == "Axis" || type == InputActionType.Button)
-				RaiseButtonInput(ctx.action.name, false, 0f);
-			// Unsupported types already logged in OnActionPerformed
+			if (layout == "Vector2" || type == InputActionType.Value && String.IsNullOrEmpty(layout))
+				SetDirectionalInput(ctx.action.name, LunyVector2.Zero);
+			else if (layout == "Axis")
+				SetAxisInput(ctx.action.name, 0f);
+			else if (type == InputActionType.Button || layout == "Button")
+				SetButtonInput(ctx.action.name, false, 0f);
 		}
-
-		/// <summary>
-		/// Simulates axis input for testing. In real Unity, this comes from InputSystem callbacks.
-		/// </summary>
-		internal void SimulateDirectionalInput(String actionName, LunyVector2 value) => RaiseDirectionalInput(actionName, value);
-
-		/// <summary>
-		/// Simulates button press for testing. In real Unity, this comes from InputSystem callbacks.
-		/// </summary>
-		internal void SimulateButtonInput(String actionName, Boolean pressed, Single analogValue = 1f) =>
-			RaiseButtonInput(actionName, pressed, analogValue);
 	}
 }
