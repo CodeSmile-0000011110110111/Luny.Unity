@@ -66,6 +66,15 @@ namespace Luny.Unity.Engine.Bridge
 		private UnityGameObject(GameObject gameObject, Int64 instanceId)
 			: base(gameObject, instanceId, gameObject.activeSelf, IsNativeObjectVisible(gameObject)) => Name = gameObject.name;
 
+		protected override LunyTransform GetNativeTransform()
+		{
+			var go = GO;
+			if (go == null)
+				return null;
+
+			return new UnityTransform(go.transform);
+		}
+
 		protected override void DestroyNativeObject() => Object.Destroy(GO); // Destroy handles null parameters
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
