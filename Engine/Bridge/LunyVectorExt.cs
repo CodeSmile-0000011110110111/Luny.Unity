@@ -1,4 +1,6 @@
-namespace Luny.Unity
+using Luny.Engine.Bridge;
+
+namespace Luny.Unity.Engine.Bridge
 {
 	public static class LunyVectorExt
 	{
