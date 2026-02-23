@@ -29,10 +29,8 @@ namespace Luny.Unity.Engine.Services
 				else
 					map.Disable();
 
-				LunyLogger.LogInfo($"== Processing InputActionMap: {map.name}, enabled: {map.enabled}", this);
 				foreach (var action in map.actions)
 				{
-					LunyLogger.LogInfo($"---- Registering InputAction: {action.name}, enabled: {action.enabled}", this);
 					action.performed += OnActionPerformed;
 					action.canceled += OnActionCanceled;
 				}
