@@ -2,6 +2,7 @@ using Luny.Engine.Bridge;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Object = System.Object;
 
 namespace Luny.Unity.Engine.Bridge
 {
@@ -9,7 +10,7 @@ namespace Luny.Unity.Engine.Bridge
 	{
 		private readonly Transform _nativeTransform;
 
-		internal Transform NativeTransform => _nativeTransform;
+		public override Object NativeObject => _nativeTransform;
 
 		public override LunyVector3 Position
 		{

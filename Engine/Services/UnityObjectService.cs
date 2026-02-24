@@ -8,9 +8,20 @@ namespace Luny.Unity.Engine.Services
 {
 	public sealed class UnityObjectService : LunyObjectServiceBase, ILunyObjectService
 	{
-		public override ILunyObject CreateEmpty(String name) => UnityGameObject.ToLunyObject(new GameObject(name));
+		private static void ApplyProperties(GameObject go, ILunyObject parent, in LunyVector3 position, in LunyQuaternion rotation,
+			in LunyVector3 scale)
+		{
+			var transform = go.transform;
+			transform.localPosition = position.ToUnity();
+			transform.localRotation = rotation.ToUnity();
+			transform.localScale = scale.ToUnity();
 
-		public override ILunyObject CreatePrimitive(String name, LunyPrimitiveType type)
+			if (parent is not null && parent.IsValid)
+				transform.SetParent(parent.Cast<GameObject>().transform);
+		}
+
+		public override ILunyObject CreatePrimitive(String name, LunyPrimitiveType type, ILunyObject parent, LunyVector3 position,
+			LunyQuaternion rotation, LunyVector3 scale)
 		{
 			var go = GameObject.CreatePrimitive(type switch
 			{
@@ -23,15 +34,26 @@ namespace Luny.Unity.Engine.Services
 				var _ => throw new ArgumentOutOfRangeException(nameof(type), type.ToString()),
 			});
 			go.name = name;
+			ApplyProperties(go, parent, position, rotation, scale);
 			return UnityGameObject.ToLunyObject(go);
 		}
 
-		public override ILunyObject CreateFromPrefab(ILunyPrefab prefab)
+		public override ILunyObject CreateFromPrefab(ILunyPrefab prefab, ILunyObject parent, LunyVector3 position, LunyQuaternion rotation,
+			LunyVector3 scale)
 		{
 			if (prefab is not UnityPrefab unityPrefab)
 				throw new ArgumentException($"Prefab must be of type {nameof(UnityPrefab)}", nameof(prefab));
 
-			var go = unityPrefab.Instantiate();
+			var go = unityPrefab.Instantiate(parent);
+			ApplyProperties(go, parent, position, rotation, scale);
+			return UnityGameObject.ToLunyObject(go);
+		}
+
+		public override ILunyObject CreateEmpty(String name, ILunyObject parent, LunyVector3 position, LunyQuaternion rotation,
+			LunyVector3 scale)
+		{
+			var go = new GameObject(name);
+			ApplyProperties(go, parent, position, rotation, scale);
 			return UnityGameObject.ToLunyObject(go);
 		}
 	}

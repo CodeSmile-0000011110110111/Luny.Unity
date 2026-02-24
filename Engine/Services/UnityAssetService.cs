@@ -3,6 +3,7 @@ using Luny.Engine.Services;
 using Luny.Unity.Engine.Bridge;
 using System;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 namespace Luny.Unity.Engine.Services
@@ -13,13 +14,26 @@ namespace Luny.Unity.Engine.Services
 
 		protected override T LoadAsset<T>(LunyAssetPath path)
 		{
+			UnityEngine.Object asset = null;
 			var nativePath = path.NativePath;
-			var asset = Resources.Load(nativePath);
+			LunyLogger.LogInfo($"Try load asset path: {nativePath}", this);
+			if (nativePath.StartsWith("Assets/"))
+			{
+				asset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(nativePath);
+
+				if (asset != null)
+					LunyLogger.LogWarning($"Using Asset path '{nativePath}' only works in Editor, not in builds!", this);
+			}
+			else
+				asset = Resources.Load(nativePath);
+
 			if (asset == null)
 				return null;
 
 			if (typeof(T) == typeof(ILunyPrefab) && asset is GameObject go)
 				return new UnityPrefab(go, path) as T;
+
+			LunyLogger.LogError($"Loading assets of type '{typeof(T).Name}' is not supported.", this);
 
 			// Add more types as needed
 			return null;
@@ -33,8 +47,10 @@ namespace Luny.Unity.Engine.Services
 
 		protected override IReadOnlyDictionary<Type, String[]> GetExtensionMapping() => new Dictionary<Type, String[]>
 		{
-			// Resources.Load doesn't use extensions
-			{ typeof(ILunyPrefab), new[] { "" } },
+			{
+				// Resources.Load doesn't use extensions
+				typeof(ILunyPrefab), new[] { ".prefab", "" }
+			},
 		};
 
 		protected override T GetPlaceholder<T>(LunyAssetPath path)
