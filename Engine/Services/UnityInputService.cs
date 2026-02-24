@@ -3,6 +3,8 @@ using Luny.Engine.Services;
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
+using UnityEngine.InputSystem.Users;
 
 namespace Luny.Unity.Engine.Services
 {
@@ -12,17 +14,19 @@ namespace Luny.Unity.Engine.Services
 	/// </summary>
 	public sealed class UnityInputService : LunyInputServiceBase
 	{
+		private InputActionAsset _inputAsset = InputSystem.actions;
+
 		protected override void OnServiceStartup()
 		{
-			var asset = InputSystem.actions;
-			if (asset == null)
+			_inputAsset = InputSystem.actions;
+			if (_inputAsset == null)
 			{
 				LunyLogger.LogWarning($"{nameof(UnityInputService)}: No project-wide InputActionAsset found.");
 				return;
 			}
 
-			LunyLogger.LogInfo($"Using InputActionAsset: {asset.name}, enabled: {asset.enabled}", this);
-			foreach (var map in asset.actionMaps)
+			LunyLogger.LogInfo($"Using InputActionAsset: {_inputAsset.name}, enabled: {_inputAsset.enabled}", this);
+			foreach (var map in _inputAsset.actionMaps)
 			{
 				if (map.name == "Player")
 					map.Enable();
@@ -35,15 +39,43 @@ namespace Luny.Unity.Engine.Services
 					action.canceled += OnActionCanceled;
 				}
 			}
+
+			// Tell the system to report activity from devices not yet "paired" to a user
+			InputUser.listenForUnpairedDeviceActivity++;
+			InputUser.onUnpairedDeviceUsed += OnInputFromUnpairedDevice;
+		}
+
+		private void OnInputFromUnpairedDevice(InputControl control, InputEventPtr eventPtr)
+		{
+			var device = control.device;
+			if (device is Keyboard || device is Mouse)
+				return; // Keyboard&Mouse is active by default, we don't want to lock it in
+
+			if (device is Gamepad)
+				SetControlScheme(nameof(Gamepad));
+			else if (device is Joystick)
+				SetControlScheme(nameof(Joystick));
+			else if (device is Pen)
+				SetControlScheme("Touch");
+
+			InputUser.listenForUnpairedDeviceActivity--;
+			InputUser.onUnpairedDeviceUsed -= OnInputFromUnpairedDevice;
+		}
+
+		public override void SetControlScheme(String schemeName)
+		{
+			// This tells the Input System: "Only listen to bindings in this group"
+			// 'schemeName' must match the name in your InputSystem_Actions window exactly
+			_inputAsset.bindingMask = InputBinding.MaskByGroup(schemeName);
+			LunyLogger.LogInfo($"Using Input Control Scheme: {schemeName}", this);
 		}
 
 		protected override void OnServiceShutdown()
 		{
-			var asset = InputSystem.actions;
-			if (asset == null)
+			if (_inputAsset == null)
 				return;
 
-			foreach (var map in asset.actionMaps)
+			foreach (var map in _inputAsset.actionMaps)
 			{
 				foreach (var action in map.actions)
 				{
@@ -51,7 +83,8 @@ namespace Luny.Unity.Engine.Services
 					action.canceled -= OnActionCanceled;
 				}
 			}
-			asset.Disable();
+
+			_inputAsset.Disable();
 		}
 
 		private void OnActionPerformed(InputAction.CallbackContext ctx)
