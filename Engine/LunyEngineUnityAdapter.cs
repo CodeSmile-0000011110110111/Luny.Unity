@@ -15,11 +15,14 @@ namespace Luny.Unity.Engine
 	internal sealed partial class LunyEngineUnityAdapter : MonoBehaviour, ILunyEngineNativeAdapter, ILunyEngineNativeAdapterInternal
 	{
 		// intentionally remains private - user code must use LunyEngine.Instance!
-		internal static ILunyEngineNativeAdapter s_Instance;
+		private static ILunyEngineNativeAdapter s_Instance;
+		internal static ILunyEngineNativeAdapter Instance => s_Instance;
 
 		// hold on to LunyEngine reference (not a MonoBehaviour type)
 		private ILunyEngineLifecycle _lunyEngine;
 		public NativeEngine Engine => NativeEngine.Unity;
+
+		public event Action<LunyEngineUnityAdapter> OnInitialize;
 
 		// splitting ctor and Initialize prevents stackoverflows for cases where Instance is accessed from within ctor
 		internal static LunyEngineUnityAdapter Initialize()
