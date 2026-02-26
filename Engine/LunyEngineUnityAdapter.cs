@@ -22,8 +22,6 @@ namespace Luny.Unity.Engine
 		private ILunyEngineLifecycle _lunyEngine;
 		public NativeEngine Engine => NativeEngine.Unity;
 
-		public event Action<LunyEngineUnityAdapter> OnInitialize;
-
 		// splitting ctor and Initialize prevents stackoverflows for cases where Instance is accessed from within ctor
 		internal static LunyEngineUnityAdapter Initialize()
 		{
