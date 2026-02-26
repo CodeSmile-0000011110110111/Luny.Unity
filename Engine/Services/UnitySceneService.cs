@@ -1,5 +1,6 @@
 using Luny.Engine.Bridge;
 using Luny.Engine.Services;
+using Luny.Exceptions;
 using Luny.Unity.Engine.Bridge;
 using System;
 using System.Collections.Generic;
@@ -28,7 +29,10 @@ namespace Luny.Unity.Engine.Services
 			foreach (var rootObj in rootGameObjects)
 			{
 				if (objectNames.Contains(rootObj.name))
-					foundObjects.Add(UnityGameObject.ToLunyObject(rootObj));
+				{
+					var lunyObject = UnityGameObject.ToLunyObject(rootObj);
+					foundObjects.Add(lunyObject);
+				}
 
 				// check all children recursively => getting their Transform is shorthand
 				var transforms = rootObj.GetComponentsInChildren<Transform>(true);
@@ -62,7 +66,11 @@ namespace Luny.Unity.Engine.Services
 
 		protected override void OnServiceStartup()
 		{
-			CurrentScene = new UnityScene(SceneManager.GetActiveScene());
+			var activeScene = SceneManager.GetActiveScene();
+			if (string.IsNullOrEmpty(activeScene.path))
+				throw new LunyServiceException("Cannot launch Luny in an 'Untitled' (unsaved) scene. Save the scene, then try again!");
+
+			CurrentScene = new UnityScene(activeScene);
 			LunyLogger.LogInfo($"{nameof(OnServiceInitialize)}: CurrentScene={CurrentScene}", this);
 
 			InvokeOnSceneLoaded(CurrentScene);

@@ -37,13 +37,23 @@ namespace Luny.Unity.Engine.Bridge
 			}
 		}
 
-		public static ILunyObject ToLunyObject(GameObject gameObject)
+		/// <summary>
+		/// Wraps a GameObject instance as engine-agnostic LunyObject.
+		/// </summary>
+		/// <remarks></remarks>
+		/// <param name="gameObject">A valid GameObject instance. The parameter is System.Object on purpose: Unity Console message double-click will not open the topmost line of the callstack otherwise for some reason.</param>
+		/// <returns></returns>
+		/// <exception cref="ArgumentException"></exception>
+		public static ILunyObject ToLunyObject(System.Object gameObject)
 		{
-			var instanceId = gameObject.GetEntityId();
+			if (gameObject is not GameObject go)
+				throw new ArgumentException($"[{nameof(UnityGameObject)}] {nameof(ToLunyObject)}: {gameObject} must be a GameObject instance");
+
+			var instanceId = go.GetEntityId();
 			if (TryGetCached(instanceId, out var lunyObject))
 				return lunyObject;
 
-			return new UnityGameObject(gameObject, instanceId);
+			return new UnityGameObject(go, instanceId);
 		}
 
 		internal static ILunyObject FindNativeObject(String name)
@@ -63,8 +73,11 @@ namespace Luny.Unity.Engine.Bridge
 			return gameObject.TryGetComponent<Renderer>(out var renderer) && renderer.enabled;
 		}
 
-		private UnityGameObject(GameObject gameObject, Int64 instanceId)
-			: base(gameObject, instanceId, gameObject.activeSelf, IsNativeObjectVisible(gameObject)) => Name = gameObject.name;
+		// Odd: method signature must not use UnityEngine.Object arguments or else double-clicking Console messages
+		// with callstacks pointing to within will not open the topmost line in the callstack!
+		private UnityGameObject(System.Object gameObject, Int64 instanceId)
+			: base(gameObject, instanceId, ((GameObject)gameObject).activeSelf, IsNativeObjectVisible((GameObject)gameObject)) =>
+			Name = ((GameObject)gameObject).name;
 
 		protected override LunyTransform GetNativeTransform()
 		{

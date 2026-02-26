@@ -1,6 +1,6 @@
 {
     "name": "Luny.Unity",
-    "rootNamespace": "Luny.Unity",
+    "rootNamespace": "",
     "references": [
         "GUID:d8105533248dd994a834ff6858cf7898",
         "GUID:75469ad4d38634e559750d17036d5f7c"
