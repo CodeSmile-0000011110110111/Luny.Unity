@@ -6,12 +6,24 @@ namespace Luny.Unity.Engine.Bridge.Physics
 {
 	public sealed class UnityCollision : LunyCollision
 	{
-		private Collision Collision => (Collision)NativeObject;
+		private LunyCollider _collider;
 
-		public override String Tag => Collision.gameObject.tag;
-		public override String Name => Collision.gameObject.name;
-		public override String LayerName => LayerMask.LayerToName(Layer);
-		public override Int32 Layer => Collision.gameObject.layer;
-		public override Boolean HasComponent(Type type) => Collision.gameObject.TryGetComponent(type, out var _);
+		private Collision Collision => (Collision)NativeObject;
+		private Boolean IsValid => _nativeObject != null;
+
+		public override LunyCollider Collider => _collider ??= IsValid ? new UnityCollider(Collision.collider) : null;
+		public override String Tag => IsValid ? Collision.gameObject.tag : null;
+		public override String Name => IsValid ? Collision.gameObject.name : null;
+		public override String LayerName => IsValid ? LayerMask.LayerToName(Collision.gameObject.layer) : null;
+		public override Int32 Layer => IsValid ? Collision.gameObject.layer : 0;
+
+		internal UnityCollision() {}
+
+		public UnityCollision(Collision collision)
+			: base(collision) {}
+
+		internal void SetNativeObject(Collision nativeObject) => _nativeObject = nativeObject;
+
+		public override Boolean HasComponent(Type type) => IsValid && Collision.gameObject.TryGetComponent(type, out var _);
 	}
 }
