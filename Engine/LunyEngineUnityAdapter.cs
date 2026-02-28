@@ -16,10 +16,10 @@ namespace Luny.Unity.Engine
 	{
 		// intentionally remains private - user code must use LunyEngine.Instance!
 		private static ILunyEngineNativeAdapter s_Instance;
-		internal static ILunyEngineNativeAdapter Instance => s_Instance;
 
 		// hold on to LunyEngine reference (not a MonoBehaviour type)
 		private ILunyEngineLifecycle _lunyEngine;
+		internal static ILunyEngineNativeAdapter Instance => s_Instance;
 		public NativeEngine Engine => NativeEngine.Unity;
 
 		// splitting ctor and Initialize prevents stackoverflows for cases where Instance is accessed from within ctor
