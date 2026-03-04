@@ -35,6 +35,7 @@ namespace Luny.Unity.Engine.Services
 
 				foreach (var action in map.actions)
 				{
+					action.started += OnActionStarted;
 					action.performed += OnActionPerformed;
 					action.canceled += OnActionCanceled;
 				}
@@ -43,31 +44,6 @@ namespace Luny.Unity.Engine.Services
 			// Tell the system to report activity from devices not yet "paired" to a user
 			InputUser.listenForUnpairedDeviceActivity++;
 			InputUser.onUnpairedDeviceUsed += OnInputFromUnpairedDevice;
-		}
-
-		private void OnInputFromUnpairedDevice(InputControl control, InputEventPtr eventPtr)
-		{
-			var device = control.device;
-			if (device is Keyboard || device is Mouse)
-				return; // Keyboard&Mouse is active by default, we don't want to lock it in
-
-			if (device is Gamepad)
-				SetControlScheme(nameof(Gamepad));
-			else if (device is Joystick)
-				SetControlScheme(nameof(Joystick));
-			else if (device is Pen)
-				SetControlScheme("Touch");
-
-			InputUser.listenForUnpairedDeviceActivity--;
-			InputUser.onUnpairedDeviceUsed -= OnInputFromUnpairedDevice;
-		}
-
-		public override void SetControlScheme(String schemeName)
-		{
-			// This tells the Input System: "Only listen to bindings in this group"
-			// 'schemeName' must match the name in your InputSystem_Actions window exactly
-			_inputAsset.bindingMask = InputBinding.MaskByGroup(schemeName);
-			LunyLogger.LogInfo($"Using Input Control Scheme: {schemeName}", this);
 		}
 
 		protected override void OnServiceShutdown()
@@ -79,6 +55,7 @@ namespace Luny.Unity.Engine.Services
 			{
 				foreach (var action in map.actions)
 				{
+					action.started -= OnActionStarted;
 					action.performed -= OnActionPerformed;
 					action.canceled -= OnActionCanceled;
 				}
@@ -87,37 +64,79 @@ namespace Luny.Unity.Engine.Services
 			_inputAsset.Disable();
 		}
 
-		private void OnActionPerformed(InputAction.CallbackContext ctx)
+		private void OnInputFromUnpairedDevice(InputControl control, InputEventPtr eventPtr)
 		{
-			var layout = ctx.action.expectedControlType;
-			var type = ctx.action.type;
-			//LunyLogger.LogInfo($"Performed: {ctx.action.name}, {ctx}", this);
+			var device = control.device;
+			if (device is Keyboard || device is Mouse)
+				return; // Keyboard&Mouse should always remain active
+
+			if (device is Gamepad)
+				SetControlSchemes(nameof(Gamepad));
+			else if (device is Joystick)
+				SetControlSchemes(nameof(Joystick));
+			else if (device is Pen)
+				SetControlSchemes("Touch");
+
+			InputUser.listenForUnpairedDeviceActivity--;
+			InputUser.onUnpairedDeviceUsed -= OnInputFromUnpairedDevice;
+		}
+
+		public override void SetControlSchemes(params String[] schemeNames)
+		{
+			// This tells the Input System: "Only listen to bindings in this group"
+			// 'schemeName' must match the name in your InputSystem_Actions window exactly
+			_inputAsset.bindingMask = InputBinding.MaskByGroups(schemeNames);
+			LunyLogger.LogInfo($"Using Input Control Schemes: {String.Join(", ", schemeNames)}", this);
+		}
+
+		private void ProcessInputEvent(InputAction.CallbackContext context)
+		{
+			var action = context.action;
+			var inputEvent = GetInputActionEvent(action.name);
+			inputEvent.ActionMapName = action.actionMap.name;
+			inputEvent.ActionName = action.name;
+			inputEvent.Phase = (LunyInputActionPhase)context.phase;
+			inputEvent.EventFrame = (int)LunyEngine.Instance.Time.FrameCount;
+			HandleInputActionEvent(inputEvent);
+		}
+
+		private void OnActionStarted(InputAction.CallbackContext context) => ProcessInputEvent(context);
+
+		private void OnActionPerformed(InputAction.CallbackContext context)
+		{
+			ProcessInputEvent(context);
+
+			var layout = context.action.expectedControlType;
+			var type = context.action.type;
+			//LunyLogger.LogInfo($"Performed: {context.action.actionMap.name}.{context.action.name}", this);
 
 			if (layout == "Vector2" || type == InputActionType.Value && String.IsNullOrEmpty(layout))
 			{
-				var vec = ctx.ReadValue<Vector2>();
-				SetDirectionalInput(ctx.action.name, new LunyVector2(vec.x, vec.y));
+				var vec = context.ReadValue<Vector2>();
+				SetDirectionalInput(context.action.name, new LunyVector2(vec.x, vec.y));
 			}
 			else if (layout == "Axis")
-				SetAxisInput(ctx.action.name, ctx.ReadValue<Single>());
+				SetAxisInput(context.action.name, context.ReadValue<Single>());
 			else if (type == InputActionType.Button || layout == "Button")
-				SetButtonInput(ctx.action.name, true, ctx.ReadValue<Single>());
+				SetButtonInput(context.action.name, true, context.ReadValue<Single>());
 			else
-				LunyLogger.LogInfo($"Unsupported control layout '{layout}' for action '{ctx.action.name}'", this);
+				LunyLogger.LogInfo($"Unsupported control layout '{layout}' for action '{context.action.name}'", this);
 		}
 
-		private void OnActionCanceled(InputAction.CallbackContext ctx)
+		private void OnActionCanceled(InputAction.CallbackContext context)
 		{
-			var layout = ctx.action.expectedControlType;
-			var type = ctx.action.type;
+			ProcessInputEvent(context);
+
+			var layout = context.action.expectedControlType;
+			var type = context.action.type;
 			//LunyLogger.LogInfo($"Canceled: {ctx.action.name}, {ctx}", this);
 
 			if (layout == "Vector2" || type == InputActionType.Value && String.IsNullOrEmpty(layout))
-				SetDirectionalInput(ctx.action.name, LunyVector2.Zero);
+				SetDirectionalInput(context.action.name, LunyVector2.Zero);
 			else if (layout == "Axis")
-				SetAxisInput(ctx.action.name, 0f);
+				SetAxisInput(context.action.name, 0f);
 			else if (type == InputActionType.Button || layout == "Button")
-				SetButtonInput(ctx.action.name, false, 0f);
+				SetButtonInput(context.action.name, false, 0f);
 		}
 	}
 }
