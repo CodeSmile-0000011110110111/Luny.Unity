@@ -2,6 +2,7 @@ using Luny.Engine.Bridge;
 using System;
 using System.Runtime.CompilerServices;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
 namespace Luny.Unity.Engine.Bridge
@@ -60,9 +61,39 @@ namespace Luny.Unity.Engine.Bridge
 		{
 			var foundObject = GameObject.Find(name);
 			if (foundObject == null)
+				foundObject = FindInactive(name);
+
+			if (foundObject == null)
 				return null;
 
 			return ToLunyObject(foundObject);
+		}
+
+		private static GameObject FindInactive(String name)
+		{
+			foreach (var root in SceneManager.GetActiveScene().GetRootGameObjects())
+			{
+				var found = FindRecursive(root.transform, name);
+				if (found != null)
+					return found.gameObject;
+			}
+
+			return null;
+		}
+
+		private static Transform FindRecursive(Transform parent, String name)
+		{
+			if (parent.name == name)
+				return parent;
+
+			foreach (Transform child in parent)
+			{
+				var found = FindRecursive(child, name);
+				if (found != null)
+					return found;
+			}
+
+			return null;
 		}
 
 		private static Boolean IsNativeObjectVisible(GameObject gameObject)
