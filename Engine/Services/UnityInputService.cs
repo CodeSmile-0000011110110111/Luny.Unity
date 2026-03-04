@@ -92,7 +92,7 @@ namespace Luny.Unity.Engine.Services
 		private void ProcessInputEvent(InputAction.CallbackContext context)
 		{
 			var action = context.action;
-			var inputEvent = GetInputActionEvent(action.name);
+			var inputEvent = GetOrCreateInputActionEvent(action.name);
 			inputEvent.ActionMapName = action.actionMap.name;
 			inputEvent.ActionName = action.name;
 			inputEvent.Phase = (LunyInputActionPhase)context.phase;
