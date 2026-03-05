@@ -97,7 +97,7 @@ namespace Luny.Unity.Engine.Services
 			inputEvent.ActionMapName = action.actionMap.name;
 			inputEvent.ActionName = action.name;
 			inputEvent.Phase = (LunyInputActionPhase)context.phase;
-			inputEvent.EventFrame = (int)LunyEngine.Instance.Time.FrameCount;
+			inputEvent.EventFrame = (Int32)LunyEngine.Instance.Time.FrameCount;
 			HandleInputActionEvent(inputEvent);
 		}
 

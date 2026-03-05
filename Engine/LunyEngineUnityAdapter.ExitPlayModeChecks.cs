@@ -1,8 +1,8 @@
 #if UNITY_EDITOR
 using Luny.Unity.Engine.Bridge;
+using System;
 using UnityEditor;
 using UnityEngine;
-using System;
 
 namespace Luny.Unity.Engine
 {

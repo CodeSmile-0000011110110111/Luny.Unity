@@ -67,7 +67,7 @@ namespace Luny.Unity.Engine.Services
 		protected override void OnServiceStartup()
 		{
 			var activeScene = SceneManager.GetActiveScene();
-			if (string.IsNullOrEmpty(activeScene.path))
+			if (String.IsNullOrEmpty(activeScene.path))
 				throw new LunyServiceException("Cannot launch Luny in an 'Untitled' (unsaved) scene. Save the scene, then try again!");
 
 			CurrentScene = new UnityScene(activeScene);

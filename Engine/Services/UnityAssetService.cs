@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Luny.Unity.Engine.Services
 {
@@ -14,12 +15,12 @@ namespace Luny.Unity.Engine.Services
 
 		protected override T LoadAsset<T>(LunyAssetPath path)
 		{
-			UnityEngine.Object asset = null;
+			Object asset = null;
 			var nativePath = path.NativePath;
 			LunyLogger.LogInfo($"Try load asset path: {nativePath}", this);
 			if (nativePath.StartsWith("Assets/"))
 			{
-				asset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(nativePath);
+				asset = AssetDatabase.LoadAssetAtPath<Object>(nativePath);
 
 				if (asset != null)
 					LunyLogger.LogWarning($"Using Asset path '{nativePath}' only works in Editor, not in builds!", this);
