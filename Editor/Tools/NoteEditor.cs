@@ -3,11 +3,12 @@ using System;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityEditor_Editor = UnityEditor.Editor;
 
 namespace Luny.UnityEditor.Tools
 {
 	[CustomEditor(typeof(Note))]
-	public class NoteEditor : Editor
+	public class NoteEditor : UnityEditor_Editor
 	{
 		private static String GetNoteTitle(HelpBoxMessageType messageType)
 		{
