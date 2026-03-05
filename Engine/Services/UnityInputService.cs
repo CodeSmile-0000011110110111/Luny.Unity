@@ -61,6 +61,7 @@ namespace Luny.Unity.Engine.Services
 				}
 			}
 
+			SetControlSchemes("Keyboard&Mouse"); // reset back to default (w/o domain reload the last scheme sticks)
 			_inputAsset.Disable();
 		}
 
