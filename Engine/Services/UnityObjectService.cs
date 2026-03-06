@@ -8,8 +8,7 @@ namespace Luny.Unity.Engine.Services
 {
 	public sealed class UnityObjectService : LunyObjectServiceBase, ILunyObjectService
 	{
-		private static void ApplyProperties(GameObject go, ILunyObject parent, in LunyVector3 position, in LunyQuaternion rotation,
-			in LunyVector3 scale)
+		private static void ApplyProperties(GameObject go, ILunyObject parent, LunyVector3 position, LunyQuaternion rotation, LunyVector3? scale)
 		{
 			var transform = go.transform;
 			if (parent is not null && parent.IsValid)
@@ -17,7 +16,8 @@ namespace Luny.Unity.Engine.Services
 
 			transform.localPosition = position.ToUnity();
 			transform.localRotation = rotation.ToUnity();
-			transform.localScale = scale.ToUnity();
+			if (scale.HasValue)
+				transform.localScale = scale.Value.ToUnity();
 
 			// TODO: remove this - resetting hideflags because our current placeholder is created on the fly and hidden in the scene hierarchy
 			if (go.hideFlags == (HideFlags.HideAndDontSave | HideFlags.HideInInspector))
@@ -28,7 +28,7 @@ namespace Luny.Unity.Engine.Services
 		}
 
 		public override ILunyObject CreatePrimitive(String name, LunyPrimitiveType type, ILunyObject parent, LunyVector3 position,
-			LunyQuaternion rotation, LunyVector3 scale)
+			LunyQuaternion rotation, LunyVector3? scale)
 		{
 			var go = GameObject.CreatePrimitive(type switch
 			{
@@ -46,7 +46,7 @@ namespace Luny.Unity.Engine.Services
 		}
 
 		public override ILunyObject CreateFromPrefab(ILunyPrefab prefab, ILunyObject parent, LunyVector3 position, LunyQuaternion rotation,
-			LunyVector3 scale)
+			LunyVector3? scale)
 		{
 			if (prefab is not UnityPrefab unityPrefab)
 				throw new ArgumentException($"Prefab must be of type {nameof(UnityPrefab)}", nameof(prefab));
@@ -57,7 +57,7 @@ namespace Luny.Unity.Engine.Services
 		}
 
 		public override ILunyObject Clone(ILunyObject original, ILunyObject parent, LunyVector3 position, LunyQuaternion rotation,
-			LunyVector3 scale)
+			LunyVector3? scale)
 		{
 			var go = original.Clone(parent.Transform);
 			ApplyProperties(go.As<GameObject>(), parent, position, rotation, scale);
