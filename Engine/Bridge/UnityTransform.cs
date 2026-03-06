@@ -10,7 +10,7 @@ namespace Luny.Unity.Engine.Bridge
 	{
 		private readonly Transform _nativeTransform;
 
-		public override Object NativeObject => _nativeTransform;
+		public override Object NativeTransform => _nativeTransform;
 
 		public override LunyVector3 Position
 		{

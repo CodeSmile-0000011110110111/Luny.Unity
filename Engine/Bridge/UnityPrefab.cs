@@ -14,7 +14,7 @@ namespace Luny.Unity.Engine.Bridge
 
 			GameObject instance = default;
 			instance = parent != null && parent.IsValid
-				? Object.Instantiate(unityPrefab, (Transform)parent.Transform.NativeObject)
+				? Object.Instantiate(unityPrefab, parent.Transform.As<Transform>())
 				: Object.Instantiate(unityPrefab);
 
 			instance.name = instance.name.Replace("(Clone)", "");

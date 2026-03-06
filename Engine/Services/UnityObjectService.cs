@@ -12,12 +12,19 @@ namespace Luny.Unity.Engine.Services
 			in LunyVector3 scale)
 		{
 			var transform = go.transform;
+			if (parent is not null && parent.IsValid)
+				transform.SetParent(parent.Cast<GameObject>().transform);
+
 			transform.localPosition = position.ToUnity();
 			transform.localRotation = rotation.ToUnity();
 			transform.localScale = scale.ToUnity();
 
-			if (parent is not null && parent.IsValid)
-				transform.SetParent(parent.Cast<GameObject>().transform);
+			// TODO: remove this - resetting hideflags because our current placeholder is created on the fly and hidden in the scene hierarchy
+			if (go.hideFlags == (HideFlags.HideAndDontSave | HideFlags.HideInInspector))
+			{
+				go.SetActive(true);
+				go.hideFlags = HideFlags.None;
+			}
 		}
 
 		public override ILunyObject CreatePrimitive(String name, LunyPrimitiveType type, ILunyObject parent, LunyVector3 position,
@@ -47,6 +54,14 @@ namespace Luny.Unity.Engine.Services
 			var go = unityPrefab.Instantiate(parent);
 			ApplyProperties(go, parent, position, rotation, scale);
 			return UnityGameObject.ToLunyObject(go);
+		}
+
+		public override ILunyObject Clone(ILunyObject original, ILunyObject parent, LunyVector3 position, LunyQuaternion rotation,
+			LunyVector3 scale)
+		{
+			var go = original.Clone(parent.Transform);
+			ApplyProperties(go.As<GameObject>(), parent, position, rotation, scale);
+			return go;
 		}
 
 		public override ILunyObject CreateEmpty(String name, ILunyObject parent, LunyVector3 position, LunyQuaternion rotation,

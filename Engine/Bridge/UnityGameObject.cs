@@ -110,6 +110,10 @@ namespace Luny.Unity.Engine.Bridge
 			: base(gameObject, instanceId, ((GameObject)gameObject).activeSelf, IsNativeObjectVisible((GameObject)gameObject)) =>
 			Name = ((GameObject)gameObject).name;
 
+		public override ILunyObject Clone() => ToLunyObject(Object.Instantiate(GO));
+
+		public override ILunyObject Clone(LunyTransform parent) => ToLunyObject(Object.Instantiate(GO, parent.As<Transform>()));
+
 		protected override LunyTransform GetNativeTransform()
 		{
 			var go = GO;

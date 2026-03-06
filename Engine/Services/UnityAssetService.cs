@@ -15,15 +15,16 @@ namespace Luny.Unity.Engine.Services
 
 		protected override T LoadAsset<T>(LunyAssetPath path)
 		{
-			Object asset = null;
+			//LunyLogger.LogInfo($"Try load asset path: {path.NativePath}", this);
+
+			Object asset;
 			var nativePath = path.NativePath;
-			LunyLogger.LogInfo($"Try load asset path: {nativePath}", this);
-			if (nativePath.StartsWith("Assets/"))
+			if (nativePath.StartsWith("Assets/") || nativePath.StartsWith("Packages/"))
 			{
 				asset = AssetDatabase.LoadAssetAtPath<Object>(nativePath);
 
 				if (asset != null)
-					LunyLogger.LogWarning($"Using Asset path '{nativePath}' only works in Editor, not in builds!", this);
+					LunyLogger.LogWarning($"Using Asset path '{nativePath}' currently only works in Editor, not in builds!", this);
 			}
 			else
 				asset = Resources.Load(nativePath);
@@ -34,7 +35,7 @@ namespace Luny.Unity.Engine.Services
 			if (typeof(T) == typeof(ILunyPrefab) && asset is GameObject go)
 				return new UnityPrefab(go, path) as T;
 
-			LunyLogger.LogError($"Loading assets of type '{typeof(T).Name}' is not supported.", this);
+			LunyLogger.LogError($"Loading assets of type '{typeof(T).Name}' is not yet supported.", this);
 
 			// Add more types as needed
 			return null;
@@ -60,10 +61,11 @@ namespace Luny.Unity.Engine.Services
 			{
 				// TODO: load an actual prefab asset because this creates duplicates in the scene ("prefab" + instance)
 				var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
-				//go.hideFlags = HideFlags.HideInHierarchy | HideFlags.DontSave;
-				go.name = $"Not found: {path}";
+				go.SetActive(false);
 				go.AddComponent<BoxCollider>();
 				go.AddComponent<Rigidbody>();
+				go.hideFlags = HideFlags.HideAndDontSave | HideFlags.HideInInspector;
+				go.name = $"N/A: {path}";
 				return new UnityPrefab(go, path) as T;
 			}
 			return null;
