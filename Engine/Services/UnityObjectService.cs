@@ -8,14 +8,38 @@ namespace Luny.Unity.Engine.Services
 {
 	public sealed class UnityObjectService : LunyObjectServiceBase, ILunyObjectService
 	{
-		private static void ApplyProperties(GameObject go, ILunyObject parent, LunyVector3 position, LunyQuaternion rotation, LunyVector3? scale)
+		private static void ApplyProperties(GameObject go, ILunyObject parent, LunyVector3? position, LunyQuaternion? rotation,
+			LunyVector3? scale)
 		{
 			var transform = go.transform;
 			if (parent is not null && parent.IsValid)
 				transform.SetParent(parent.Cast<GameObject>().transform);
 
-			transform.localPosition = position.ToUnity();
-			transform.localRotation = rotation.ToUnity();
+			var hasRigidbody = go.TryGetComponent<Rigidbody>(out var rigidbody);
+			var hasRigidbody2D = go.TryGetComponent<Rigidbody2D>(out var rigidbody2d);
+			if (position.HasValue)
+			{
+				transform.localPosition = position.Value.ToUnity();
+
+				// sync rigidbody in case of: a) interpolation enabled and b) instantiated outside of FixedUpdate
+				if (hasRigidbody)
+				 	rigidbody.position = transform.position;
+				else if (hasRigidbody2D)
+				{
+					var pos = transform.position;
+					rigidbody2d.position = new Vector2(pos.x, pos.z);
+				}
+			}
+			if (rotation.HasValue)
+			{
+				transform.localRotation = rotation.Value.ToUnity();
+
+				// sync rigidbody in case of: a) interpolation enabled and b) instantiated outside of FixedUpdate
+				if (hasRigidbody)
+					rigidbody.rotation = transform.rotation;
+				else if (hasRigidbody2D)
+					rigidbody2d.rotation = transform.rotation.eulerAngles.z;
+			}
 			if (scale.HasValue)
 				transform.localScale = scale.Value.ToUnity();
 
@@ -25,10 +49,13 @@ namespace Luny.Unity.Engine.Services
 				go.SetActive(true);
 				go.hideFlags = HideFlags.None;
 			}
+
+			// LunyLogger.LogInfo($"Created {go.name} ({transform.GetEntityId()}) at:{transform.localPosition}, " +
+			//                    $"rot:{transform.localRotation.eulerAngles}, scale:{transform.localScale}", go);
 		}
 
-		public override ILunyObject CreatePrimitive(String name, LunyPrimitiveType type, ILunyObject parent, LunyVector3 position,
-			LunyQuaternion rotation, LunyVector3? scale)
+		public override ILunyObject CreatePrimitive(String name, LunyPrimitiveType type, ILunyObject parent, LunyVector3? position,
+			LunyQuaternion? rotation, LunyVector3? scale)
 		{
 			var go = GameObject.CreatePrimitive(type switch
 			{
@@ -45,27 +72,30 @@ namespace Luny.Unity.Engine.Services
 			return UnityGameObject.ToLunyObject(go);
 		}
 
-		public override ILunyObject CreateFromPrefab(ILunyPrefab prefab, ILunyObject parent, LunyVector3 position, LunyQuaternion rotation,
+		public override ILunyObject CreateFromPrefab(ILunyPrefab prefab, ILunyObject parent, LunyVector3? position, LunyQuaternion? rotation,
 			LunyVector3? scale)
 		{
 			if (prefab is not UnityPrefab unityPrefab)
 				throw new ArgumentException($"Prefab must be of type {nameof(UnityPrefab)}", nameof(prefab));
 
-			var go = unityPrefab.Instantiate(parent);
-			ApplyProperties(go, parent, position, rotation, scale);
+			var pos = position?.ToUnity() ?? Vector3.zero;
+			var rot = rotation?.ToUnity() ?? Quaternion.identity;
+			var go = unityPrefab.Instantiate(parent?.Transform?.As<Transform>(), pos, rot);
+			if (scale.HasValue)
+				go.transform.localScale = scale.Value.ToUnity();
 			return UnityGameObject.ToLunyObject(go);
 		}
 
-		public override ILunyObject Clone(ILunyObject original, ILunyObject parent, LunyVector3 position, LunyQuaternion rotation,
+		public override ILunyObject Clone(ILunyObject original, ILunyObject parent, LunyVector3? position, LunyQuaternion? rotation,
 			LunyVector3? scale)
 		{
-			var go = original.Clone(parent.Transform);
+			var go = original?.Clone(parent?.Transform);
 			ApplyProperties(go.As<GameObject>(), parent, position, rotation, scale);
 			return go;
 		}
 
-		public override ILunyObject CreateEmpty(String name, ILunyObject parent, LunyVector3 position, LunyQuaternion rotation,
-			LunyVector3 scale)
+		public override ILunyObject CreateEmpty(String name, ILunyObject parent, LunyVector3? position, LunyQuaternion? rotation,
+			LunyVector3? scale)
 		{
 			var go = new GameObject(name);
 			ApplyProperties(go, parent, position, rotation, scale);
