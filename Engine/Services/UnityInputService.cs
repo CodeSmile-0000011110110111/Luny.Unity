@@ -1,10 +1,14 @@
 ﻿using Luny.Engine.Bridge;
 using Luny.Engine.Services;
+using Luny.Unity.Engine.Native;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.InputSystem.Users;
+using Object = UnityEngine.Object;
 
 namespace Luny.Unity.Engine.Services
 {
@@ -16,17 +20,49 @@ namespace Luny.Unity.Engine.Services
 	{
 		private InputActionAsset _inputAsset = InputSystem.actions;
 
-		protected override void OnServiceStartup()
+		// Key: InputUser.id
+		private Dictionary<UInt32, PlayerInputProfile> _inputProfiles = new();
+
+		private InputDevice _lastUsedDevice;
+		private PlayerInputProfile HostProfile => _inputProfiles[HostUser.id];
+		private InputUser HostUser { get; set; }
+
+		private static String[] GetPairedControlSchemes(InputUser user)
 		{
-			_inputAsset = InputSystem.actions;
-			if (_inputAsset == null)
+			var schemes = new HashSet<String>();
+			foreach (var pairedDevice in user.pairedDevices)
 			{
-				LunyLogger.LogWarning($"{nameof(UnityInputService)}: No project-wide InputActionAsset found.");
-				return;
+				switch (pairedDevice)
+				{
+					case Gamepad:
+						schemes.Add(nameof(Gamepad));
+						break;
+					case Joystick:
+						schemes.Add(nameof(Joystick));
+						break;
+					case Keyboard:
+					case Mouse:
+						schemes.Add("Keyboard&Mouse");
+						break;
+				}
 			}
 
-			LunyLogger.LogInfo($"Using InputActionAsset: {_inputAsset.name}, enabled: {_inputAsset.enabled}", this);
-			foreach (var map in _inputAsset.actionMaps)
+			return schemes.ToArray();
+		}
+
+		private void CreateAndAddHostUser()
+		{
+			HostUser = InputUser.CreateUserWithoutPairedDevices();
+			CreatePlayerProfile(HostUser, "Host");
+		}
+
+		private PlayerInputProfile CreatePlayerProfile(InputUser user, String userName)
+		{
+			var userInputAsset = Object.Instantiate(_inputAsset);
+			user.AssociateActionsWithUser(userInputAsset);
+
+			LunyLogger.LogInfo($"Using InputActionAsset: {userInputAsset.name}, enabled: {userInputAsset.enabled}", this);
+			foreach (var map in userInputAsset.actionMaps)
 			{
 				if (map.name == "Player")
 					map.Enable();
@@ -41,6 +77,41 @@ namespace Luny.Unity.Engine.Services
 				}
 			}
 
+			//var uiModules = GameObject.FindObjectsByType<InputSystemUIInputModule>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+
+			var profile = new PlayerInputProfile { UserId = user.id, UserName = userName, ActionAsset = userInputAsset };
+			_inputProfiles.Add(user.id, profile);
+
+			var schemes = GetPairedControlSchemes(user);
+			SetControlSchemes(profile, schemes);
+
+			LunyLogger.LogInfo($"Created player profile: {profile}", this);
+			return profile;
+		}
+
+		private PlayerInputProfile GetPlayerProfile(InputUser deviceUser) => _inputProfiles[deviceUser.id];
+
+		private void PairKeyboardAndMouseToHostUser()
+		{
+			// Join Mouse+Keyboard to host right away
+			if (Keyboard.current != null)
+				InputUser.PerformPairingWithDevice(Keyboard.current, HostUser);
+			if (Mouse.current != null)
+				InputUser.PerformPairingWithDevice(Mouse.current, HostUser);
+		}
+
+		protected override void OnServiceStartup()
+		{
+			_inputAsset = InputSystem.actions;
+			if (_inputAsset == null)
+			{
+				LunyLogger.LogError($"{nameof(UnityInputService)}: No project-wide InputActionAsset found.");
+				return;
+			}
+
+			CreateAndAddHostUser();
+			PairKeyboardAndMouseToHostUser();
+
 			// Tell the system to report activity from devices not yet "paired" to a user
 			InputUser.listenForUnpairedDeviceActivity++;
 			InputUser.onUnpairedDeviceUsed += OnInputFromUnpairedDevice;
@@ -51,54 +122,107 @@ namespace Luny.Unity.Engine.Services
 			if (_inputAsset == null)
 				return;
 
-			foreach (var map in _inputAsset.actionMaps)
+			InputUser.listenForUnpairedDeviceActivity = 0;
+			InputUser.onUnpairedDeviceUsed -= OnInputFromUnpairedDevice;
+
+			foreach (var profile in _inputProfiles.Values)
 			{
-				foreach (var action in map.actions)
+				profile.Pawns.Clear();
+
+				var inputAsset = (InputActionAsset)profile.ActionAsset;
+				if (inputAsset == null)
+					continue;
+
+				foreach (var map in inputAsset.actionMaps)
 				{
-					action.started -= OnActionStarted;
-					action.performed -= OnActionPerformed;
-					action.canceled -= OnActionCanceled;
+					foreach (var action in map.actions)
+					{
+						action.started -= OnActionStarted;
+						action.performed -= OnActionPerformed;
+						action.canceled -= OnActionCanceled;
+					}
 				}
+
+				Object.Destroy(inputAsset);
+			}
+			_inputProfiles.Clear();
+
+			foreach (var inputUser in InputUser.all)
+			{
+				if (inputUser.valid)
+					inputUser.UnpairDevicesAndRemoveUser();
 			}
 
-			SetControlSchemes("Keyboard&Mouse"); // reset back to default (w/o domain reload the last scheme sticks)
+			_inputAsset.bindingMask = null; // reset back to default (w/o domain reload the last scheme sticks)
 			_inputAsset.Disable();
+			_inputAsset = null;
 		}
 
 		private void OnInputFromUnpairedDevice(InputControl control, InputEventPtr eventPtr)
 		{
+			// Handle Keyboard & Mouse in case they get plugged in after play started
 			var device = control.device;
 			if (device is Keyboard || device is Mouse)
-				return; // Keyboard&Mouse should always remain active
+				PairKeyboardAndMouseToHostUser();
 
-			if (device is Gamepad)
-				SetControlSchemes(nameof(Gamepad));
-			else if (device is Joystick)
-				SetControlSchemes(nameof(Joystick));
-			else if (device is Pen)
-				SetControlSchemes("Touch");
+			/*
+			// This check is essential to prevent "accidental" processing merely by input drift or gyro.
+			if (!control.IsPressed())
+				return;
+				*/
+		}
 
-			InputUser.listenForUnpairedDeviceActivity--;
-			InputUser.onUnpairedDeviceUsed -= OnInputFromUnpairedDevice;
+		public void SetControlSchemes(PlayerInputProfile profile, params String[] schemeNames)
+		{
+			// This tells the Input System: "Only listen to bindings in this group"
+			// 'schemeName' must match the name in your InputSystem_Actions window exactly
+			var asset = (InputActionAsset)profile.ActionAsset;
+			if (asset != null)
+			{
+				LunyLogger.LogInfo($"User Input Control Schemes: {String.Join(", ", schemeNames)}", this);
+				asset.bindingMask = InputBinding.MaskByGroups(schemeNames);
+			}
 		}
 
 		public override void SetControlSchemes(params String[] schemeNames)
 		{
+			LunyLogger.LogInfo($"Global Input Control Schemes: {String.Join(", ", schemeNames)}", this);
+
 			// This tells the Input System: "Only listen to bindings in this group"
 			// 'schemeName' must match the name in your InputSystem_Actions window exactly
 			_inputAsset.bindingMask = InputBinding.MaskByGroups(schemeNames);
-			LunyLogger.LogInfo($"Using Input Control Schemes: {String.Join(", ", schemeNames)}", this);
+		}
+
+		public override void AssignUserToLastDevice(String userName, ILunyObject lunyObject)
+		{
+			if (_lastUsedDevice == null)
+				return;
+
+			var deviceUser = InputUser.FindUserPairedToDevice(_lastUsedDevice);
+			var profile = deviceUser.HasValue
+				? CreatePlayerProfile(InputUser.PerformPairingWithDevice(_lastUsedDevice), userName)
+				: GetPlayerProfile(deviceUser.Value);
+
+			profile.Pawns.Add(lunyObject);
 		}
 
 		private void ProcessInputEvent(InputAction.CallbackContext context)
 		{
+			_lastUsedDevice = context.control.device;
+
 			var action = context.action;
 			var inputEvent = GetOrCreateInputActionEvent(action.name);
 			inputEvent.ActionMapName = action.actionMap.name;
 			inputEvent.ActionName = action.name;
+			inputEvent.UserName = GetUserName(_lastUsedDevice);
 			inputEvent.Phase = (LunyInputActionPhase)context.phase;
-			inputEvent.EventFrame = (Int32)LunyEngine.Instance.Time.FrameCount;
 			HandleInputActionEvent(inputEvent);
+		}
+
+		private String GetUserName(InputDevice device)
+		{
+			var user = InputUser.FindUserPairedToDevice(device);
+			return user.HasValue && _inputProfiles.TryGetValue(user.Value.id, out var profile) ? profile.UserName : null;
 		}
 
 		private void OnActionStarted(InputAction.CallbackContext context) => ProcessInputEvent(context);
