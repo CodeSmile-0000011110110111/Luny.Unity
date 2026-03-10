@@ -21,11 +21,10 @@ namespace Luny.Unity.Engine.Services
 		private InputActionAsset _globalInputActions;
 
 		// Key: InputUser.id
-		private Dictionary<UInt32, PlayerInputProfile> _inputProfiles = new();
+		private Dictionary<UInt32, PlayerInputProfile> _playerProfiles = new();
 
 		private InputDevice _lastUsedDevice;
-		private UInt32 _hostUserId;
-		private PlayerInputProfile HostProfile => _inputProfiles[_hostUserId];
+		private PlayerInputProfile HostProfile { get; set; }
 
 		private static InputUser? UnpairUserFromDevice(InputDevice device)
 		{
@@ -41,14 +40,26 @@ namespace Luny.Unity.Engine.Services
 			return pairedUser;
 		}
 
-		private InputUser? GetHostUser() => InputUser.all.Find(_hostUserId);
+		private static Boolean TryGetPairedUser(InputDevice device, out InputUser? pairedUser)
+		{
+			pairedUser = InputUser.FindUserPairedToDevice(device);
+			return pairedUser is not null;
+		}
+
+		private static Boolean TryGetDevice(Int32 deviceId, out InputDevice device)
+		{
+			device = InputSystem.GetDeviceById(deviceId);
+			return device is not null;
+		}
+
+		private InputUser? GetHostUser() => InputUser.all.Find(HostProfile.UserId);
 
 		private Boolean TryGetPlayerProfile(InputUser deviceUser, out PlayerInputProfile profile) =>
-			_inputProfiles.TryGetValue(deviceUser.id, out profile);
+			_playerProfiles.TryGetValue(deviceUser.id, out profile);
 
 		private PlayerInputProfile GetPlayerProfile(String userName)
 		{
-			foreach (var profile in _inputProfiles.Values)
+			foreach (var profile in _playerProfiles.Values)
 			{
 				if (profile.UserName == userName)
 					return profile;
@@ -58,7 +69,7 @@ namespace Luny.Unity.Engine.Services
 
 		private PlayerInputProfile GetPlayerProfile(UInt32 userId)
 		{
-			foreach (var profile in _inputProfiles.Values)
+			foreach (var profile in _playerProfiles.Values)
 			{
 				if (profile.UserId == userId)
 					return profile;
@@ -69,8 +80,7 @@ namespace Luny.Unity.Engine.Services
 		private void CreateHostUserAndPairAllDevices()
 		{
 			var hostUser = InputUser.CreateUserWithoutPairedDevices();
-			_hostUserId = hostUser.id;
-			var hostProfile = CreatePlayerProfile(hostUser, "{InputHost}");
+			HostProfile = CreatePlayerProfile(hostUser, "{InputHost}");
 
 			foreach (var device in InputSystem.devices)
 				InputUser.PerformPairingWithDevice(device, hostUser);
@@ -102,7 +112,6 @@ namespace Luny.Unity.Engine.Services
 
 			//var uiModules = GameObject.FindObjectsByType<InputSystemUIInputModule>(FindObjectsInactive.Include, FindObjectsSortMode.None);
 			var profile = new PlayerInputProfile { UserId = user.id, UserName = userName, Actions = userInputAsset, UiInput = null };
-			_inputProfiles.Add(user.id, profile);
 
 			LunyLogger.LogInfo($"User {user} is using actions: {userInputAsset.name}", this);
 			return profile;
@@ -147,7 +156,7 @@ namespace Luny.Unity.Engine.Services
 				Object.Destroy(inputAsset);
 			}
 
-			_inputProfiles.Remove(profile.UserId);
+			_playerProfiles.Remove(profile.UserId);
 			profile.UserId = InputUser.InvalidId;
 			profile.Pawns.Clear();
 			profile.Actions = null;
@@ -161,7 +170,21 @@ namespace Luny.Unity.Engine.Services
 				DestroyPlayerProfile(profile);
 		}
 
-		public override void AssignUserToLastDevice(String userName, ILunyObject lunyObject)
+		public override Boolean IsUserPairedWithDevice(String userName, Int32 deviceId)
+		{
+			if (!TryGetDevice(deviceId, out var device))
+				return false;
+
+			if (!TryGetPairedUser(device, out var pairedUser))
+				return false;
+
+			if (!TryGetPlayerProfile(pairedUser.Value, out var profile))
+				return false;
+
+			return pairedUser.Value.id == profile.UserId;
+		}
+
+		public override void AssignUserToLastDevice(String userName, Int32 deviceId, ILunyObject lunyObject)
 		{
 			if (_lastUsedDevice == null)
 			{
@@ -174,16 +197,16 @@ namespace Luny.Unity.Engine.Services
 
 		private void AssignUserToDevice(String userName, InputDevice device, ILunyObject lunyObject)
 		{
-			var pairedUser = InputUser.FindUserPairedToDevice(device);
-			if (pairedUser.HasValue && pairedUser.Value != GetHostUser())
+			if (TryGetPairedUser(device, out var pairedUser) && pairedUser.Value.id != HostProfile.UserId)
 			{
 				LunyLogger.LogWarning($"{device.name} already paired with user {pairedUser.Value.id}: " +
 				                      $"{GetPlayerProfile(pairedUser.Value.id)?.UserName}");
 				return;
 			}
 
-			pairedUser = UnpairUserFromDevice(device);
+			UnpairUserFromDevice(device); // remove it from host user
 			pairedUser = InputUser.PerformPairingWithDevice(device);
+			LunyLogger.LogInfo($"Paired device {device.name} to user {pairedUser.Value.id}.");
 
 			// pair Mouse/Keyboard together
 			var otherDevice = device is Keyboard ? Mouse.current?.device : device is Mouse ? Keyboard.current?.device : null;
@@ -191,11 +214,14 @@ namespace Luny.Unity.Engine.Services
 			{
 				UnpairUserFromDevice(otherDevice);
 				InputUser.PerformPairingWithDevice(otherDevice, pairedUser.Value);
+				LunyLogger.LogInfo($"Paired device {otherDevice.name} to user {pairedUser.Value.id}.");
 			}
-			LunyLogger.LogInfo($"Paired device {device.name} to user {pairedUser.Value.id}.");
 
 			if (!TryGetPlayerProfile(pairedUser.Value, out var profile))
+			{
 				profile = CreatePlayerProfile(pairedUser.Value, userName);
+				_playerProfiles.Add(profile.UserId, profile);
+			}
 
 			profile.Pawns.Add(lunyObject);
 			pairedUser.Value.ActivateControlScheme(null);
@@ -232,6 +258,7 @@ namespace Luny.Unity.Engine.Services
 			inputEvent.ActionMapName = action.actionMap.name;
 			inputEvent.ActionName = action.name;
 			inputEvent.UserName = GetUserName(_lastUsedDevice);
+			inputEvent.DeviceId = _lastUsedDevice.deviceId;
 			inputEvent.Phase = (LunyInputActionPhase)context.phase;
 			HandleInputActionEvent(inputEvent);
 		}
@@ -239,7 +266,7 @@ namespace Luny.Unity.Engine.Services
 		private String GetUserName(InputDevice device)
 		{
 			var user = InputUser.FindUserPairedToDevice(device);
-			return user.HasValue && _inputProfiles.TryGetValue(user.Value.id, out var profile) ? profile.UserName : null;
+			return user.HasValue && _playerProfiles.TryGetValue(user.Value.id, out var profile) ? profile.UserName : null;
 		}
 
 		private void OnActionStarted(InputAction.CallbackContext context) => ProcessInputEvent(context);
@@ -362,9 +389,11 @@ namespace Luny.Unity.Engine.Services
 			InputUser.onUnpairedDeviceUsed -= OnInputFromUnpairedDevice;
 			InputSystem.onDeviceChange -= OnDeviceChange;
 
-			foreach (var profile in _inputProfiles.Values.ToArray())
+			foreach (var profile in _playerProfiles.Values.ToArray())
 				DestroyPlayerProfile(profile);
-			_inputProfiles.Clear(); // just in case, it should be empty by now
+			_playerProfiles.Clear(); // just in case, it should be empty by now
+
+			DestroyPlayerProfile(HostProfile);
 
 			// destroying profiles should have unpaired devices and removed users, nevertheless better err on the safe side
 			foreach (var inputUser in InputUser.all)
