@@ -18,98 +18,79 @@ namespace Luny.Unity.Engine.Services
 	/// </summary>
 	public sealed class UnityInputService : LunyInputServiceBase
 	{
-		private InputActionAsset _inputAsset = InputSystem.actions;
+		private InputActionAsset _globalInputActions;
 
 		// Key: InputUser.id
 		private Dictionary<UInt32, PlayerInputProfile> _inputProfiles = new();
 
 		private InputDevice _lastUsedDevice;
-		private PlayerInputProfile HostProfile => _inputProfiles[HostUser.id];
-		private InputUser HostUser { get; set; }
+		private UInt32 _hostUserId;
+		private PlayerInputProfile HostProfile => _inputProfiles[_hostUserId];
 
-		private String[] GetPairedControlSchemes(InputUser user)
+		private static InputUser? UnpairUserFromDevice(InputDevice device)
 		{
-			var schemes = new HashSet<String>();
-			foreach (var pairedDevice in user.pairedDevices)
-			{
-				switch (pairedDevice)
-				{
-					case Gamepad:
-						schemes.Add(nameof(Gamepad));
-						break;
-					case Joystick:
-						schemes.Add(nameof(Joystick));
-						break;
-					case Keyboard:
-					case Mouse:
-						schemes.Add("Keyboard&Mouse");
-						break;
-				}
-			}
+			if (device == null)
+				return null;
 
-			return schemes.ToArray();
+			var pairedUser = InputUser.FindUserPairedToDevice(device);
+			if (pairedUser.HasValue)
+			{
+				LunyLogger.LogInfo($"Unpairing device {device.name} from current user {pairedUser.Value.id} ...");
+				pairedUser.Value.UnpairDevice(device);
+			}
+			return pairedUser;
 		}
 
-		public void UpdateUserBindingMask(InputUser user, InputActionAsset asset)
+		private InputUser? GetHostUser() => InputUser.all.Find(_hostUserId);
+
+		private Boolean TryGetPlayerProfile(InputUser deviceUser, out PlayerInputProfile profile) =>
+			_inputProfiles.TryGetValue(deviceUser.id, out profile);
+
+		private PlayerInputProfile GetPlayerProfile(String userName)
 		{
-			var activeGroups = new HashSet<String>();
-
-			foreach (var device in user.pairedDevices)
+			foreach (var profile in _inputProfiles.Values)
 			{
-				// Find if this device matches any scheme in your asset
-				var scheme = InputControlScheme.FindControlSchemeForDevice(device, asset.controlSchemes);
-
-				if (scheme != null)
-				{
-					// Use bindingGroup if defined, otherwise fall back to the scheme name
-					activeGroups.Add(String.IsNullOrEmpty(scheme.Value.bindingGroup)
-						? scheme.Value.name
-						: scheme.Value.bindingGroup);
-				}
+				if (profile.UserName == userName)
+					return profile;
 			}
-
-			if (activeGroups.Count > 0)
-			{
-				var maskString = String.Join(";", activeGroups);
-				user.actions.bindingMask = InputBinding.MaskByGroups(maskString);
-			}
-			else
-			{
-				// Fallback: Clear mask if no schemes found to avoid disabling all input
-				user.actions.bindingMask = null;
-			}
+			return null;
 		}
 
-		private void CreateAndAddHostUser()
+		private PlayerInputProfile GetPlayerProfile(UInt32 userId)
 		{
-			HostUser = InputUser.CreateUserWithoutPairedDevices();
+			foreach (var profile in _inputProfiles.Values)
+			{
+				if (profile.UserId == userId)
+					return profile;
+			}
+			return null;
+		}
+
+		private void CreateHostUserAndPairAllDevices()
+		{
+			var hostUser = InputUser.CreateUserWithoutPairedDevices();
+			_hostUserId = hostUser.id;
+			var hostProfile = CreatePlayerProfile(hostUser, "{InputHost}");
+
 			foreach (var device in InputSystem.devices)
-				InputUser.PerformPairingWithDevice(device, HostUser);
-
-			CreatePlayerProfile(HostUser, "Host");
-		}
-
-		private void OnDeviceChange(InputDevice device, InputDeviceChange change)
-		{
-			if (change == InputDeviceChange.Added)
-			{
-				// Automatically give new devices to the Host
-				InputUser.PerformPairingWithDevice(device, HostUser);
-			}
+				InputUser.PerformPairingWithDevice(device, hostUser);
 		}
 
 		private PlayerInputProfile CreatePlayerProfile(InputUser user, String userName)
 		{
-			var userInputAsset = Object.Instantiate(_inputAsset);
-			user.AssociateActionsWithUser(userInputAsset);
+			var userInputAsset = Object.Instantiate(_globalInputActions);
 
-			LunyLogger.LogInfo($"Using InputActionAsset: {userInputAsset.name}, enabled: {userInputAsset.enabled}", this);
+			// order matters
+			user.AssociateActionsWithUser(userInputAsset);
+			user.ActivateControlScheme(null);
+
 			foreach (var map in userInputAsset.actionMaps)
 			{
 				if (map.name == "Player")
 					map.Enable();
-				else
-					map.Disable();
+
+				if (map.enabled)
+					LunyLogger.LogInfo($"Input Action Map enabled: {map.name}");
 
 				foreach (var action in map.actions)
 				{
@@ -120,73 +101,41 @@ namespace Luny.Unity.Engine.Services
 			}
 
 			//var uiModules = GameObject.FindObjectsByType<InputSystemUIInputModule>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-
-			var profile = new PlayerInputProfile { UserId = user.id, UserName = userName, ActionAsset = userInputAsset };
+			var profile = new PlayerInputProfile { UserId = user.id, UserName = userName, Actions = userInputAsset, UiInput = null };
 			_inputProfiles.Add(user.id, profile);
 
-			if (user.id != HostUser.id)
-			{
-				var schemes = GetPairedControlSchemes(user);
-				SetControlSchemes(profile, schemes);
-			}
-
-			userInputAsset.Enable();
-
-			LunyLogger.LogInfo($"Created player profile: {profile}", this);
+			LunyLogger.LogInfo($"User {user} is using actions: {userInputAsset.name}", this);
 			return profile;
 		}
 
-		private PlayerInputProfile GetPlayerProfile(InputUser deviceUser) => _inputProfiles[deviceUser.id];
-
-		private void PairKeyboardAndMouseToHostUser()
+		private void DestroyPlayerProfile(PlayerInputProfile profile)
 		{
-			LunyLogger.LogInfo("Pairing Mouse/Keyboard to Host");
-			// Join Mouse+Keyboard to host right away
-			if (Keyboard.current != null)
-				InputUser.PerformPairingWithDevice(Keyboard.current, HostUser);
-			if (Mouse.current != null)
-				InputUser.PerformPairingWithDevice(Mouse.current, HostUser);
-		}
-
-		protected override void OnServiceStartup()
-		{
-			_inputAsset = InputSystem.actions;
-			if (_inputAsset == null)
-			{
-				LunyLogger.LogError($"{nameof(UnityInputService)}: No project-wide InputActionAsset found.");
+			if (profile == null || profile.UserId == InputUser.InvalidId)
 				return;
+
+			var user = InputUser.all.Find(profile.UserId);
+			if (user.HasValue && user.Value.valid)
+			{
+				var hostUser = GetHostUser();
+				foreach (var device in user.Value.pairedDevices)
+				{
+					user.Value.UnpairDevice(device);
+
+					// re-pair device with host
+					if (hostUser.HasValue)
+						InputUser.PerformPairingWithDevice(device, hostUser.Value);
+				}
+
+				user.Value.UnpairDevicesAndRemoveUser();
 			}
-			_inputAsset.Disable();
 
-			CreateAndAddHostUser();
-			PairKeyboardAndMouseToHostUser();
-
-			// Tell the system to report activity from devices not yet "paired" to a user
-			InputUser.listenForUnpairedDeviceActivity++;
-			InputUser.onUnpairedDeviceUsed += OnInputFromUnpairedDevice;
-			// 3. Listen for any NEW devices plugged in later (Hot-plugging)
-			InputSystem.onDeviceChange += OnDeviceChange;
-		}
-
-		protected override void OnServiceShutdown()
-		{
-			if (_inputAsset == null)
-				return;
-
-			InputUser.listenForUnpairedDeviceActivity--;
-			InputUser.onUnpairedDeviceUsed -= OnInputFromUnpairedDevice;
-			InputSystem.onDeviceChange -= OnDeviceChange;
-
-			foreach (var profile in _inputProfiles.Values)
+			var inputAsset = profile.GetActions();
+			if (inputAsset != null)
 			{
-				profile.Pawns.Clear();
-
-				var inputAsset = (InputActionAsset)profile.ActionAsset;
-				if (inputAsset == null)
-					continue;
-
 				foreach (var map in inputAsset.actionMaps)
 				{
+					map.Disable();
+
 					foreach (var action in map.actions)
 					{
 						action.started -= OnActionStarted;
@@ -195,41 +144,68 @@ namespace Luny.Unity.Engine.Services
 					}
 				}
 
-				inputAsset.Disable();
 				Object.Destroy(inputAsset);
 			}
-			_inputProfiles.Clear();
 
-			foreach (var inputUser in InputUser.all)
-			{
-				if (inputUser.valid)
-					inputUser.UnpairDevicesAndRemoveUser();
-			}
-
-			_inputAsset.bindingMask = null; // reset back to default (w/o domain reload the last scheme sticks)
-			_inputAsset.Disable();
-			_inputAsset = null;
+			_inputProfiles.Remove(profile.UserId);
+			profile.UserId = InputUser.InvalidId;
+			profile.Pawns.Clear();
+			profile.Actions = null;
+			profile.UiInput = null;
 		}
 
-		private void OnInputFromUnpairedDevice(InputControl control, InputEventPtr eventPtr)
+		public override void UnassignUser(String userName)
 		{
-			// Handle Keyboard & Mouse in case they get plugged in after play started
-			var device = control.device;
-			if (device is Keyboard || device is Mouse)
-				PairKeyboardAndMouseToHostUser();
+			var profile = GetPlayerProfile(userName);
+			if (profile != null)
+				DestroyPlayerProfile(profile);
+		}
 
-			/*
-			// This check is essential to prevent "accidental" processing merely by input drift or gyro.
-			if (!control.IsPressed())
+		public override void AssignUserToLastDevice(String userName, ILunyObject lunyObject)
+		{
+			if (_lastUsedDevice == null)
+			{
+				LunyLogger.LogWarning("Can't assign user to last input device: no input received this frame", this);
 				return;
-				*/
+			}
+
+			AssignUserToDevice(userName, _lastUsedDevice, lunyObject);
+		}
+
+		private void AssignUserToDevice(String userName, InputDevice device, ILunyObject lunyObject)
+		{
+			var pairedUser = InputUser.FindUserPairedToDevice(device);
+			if (pairedUser.HasValue && pairedUser.Value != GetHostUser())
+			{
+				LunyLogger.LogWarning($"{device.name} already paired with user {pairedUser.Value.id}: " +
+				                      $"{GetPlayerProfile(pairedUser.Value.id)?.UserName}");
+				return;
+			}
+
+			pairedUser = UnpairUserFromDevice(device);
+			pairedUser = InputUser.PerformPairingWithDevice(device);
+
+			// pair Mouse/Keyboard together
+			var otherDevice = device is Keyboard ? Mouse.current?.device : device is Mouse ? Keyboard.current?.device : null;
+			if (otherDevice != null)
+			{
+				UnpairUserFromDevice(otherDevice);
+				InputUser.PerformPairingWithDevice(otherDevice, pairedUser.Value);
+			}
+			LunyLogger.LogInfo($"Paired device {device.name} to user {pairedUser.Value.id}.");
+
+			if (!TryGetPlayerProfile(pairedUser.Value, out var profile))
+				profile = CreatePlayerProfile(pairedUser.Value, userName);
+
+			profile.Pawns.Add(lunyObject);
+			pairedUser.Value.ActivateControlScheme(null);
 		}
 
 		public void SetControlSchemes(PlayerInputProfile profile, params String[] schemeNames)
 		{
 			// This tells the Input System: "Only listen to bindings in this group"
 			// 'schemeName' must match the name in your InputSystem_Actions window exactly
-			var asset = (InputActionAsset)profile.ActionAsset;
+			var asset = (InputActionAsset)profile.Actions;
 			if (asset != null)
 			{
 				LunyLogger.LogInfo($"User Input Control Schemes: {String.Join(", ", schemeNames)}", this);
@@ -243,28 +219,12 @@ namespace Luny.Unity.Engine.Services
 
 			// This tells the Input System: "Only listen to bindings in this group"
 			// 'schemeName' must match the name in your InputSystem_Actions window exactly
-			_inputAsset.bindingMask = InputBinding.MaskByGroups(schemeNames);
-		}
-
-		public override void AssignUserToLastDevice(String userName, ILunyObject lunyObject)
-		{
-			if (_lastUsedDevice == null)
-				return;
-
-			var deviceUser = InputUser.FindUserPairedToDevice(_lastUsedDevice);
-			if (deviceUser.HasValue && deviceUser.Value == HostUser)
-				HostUser.UnpairDevice(_lastUsedDevice);
-
-			var profile = deviceUser.HasValue
-				? CreatePlayerProfile(InputUser.PerformPairingWithDevice(_lastUsedDevice), userName)
-				: GetPlayerProfile(deviceUser.Value);
-
-			profile.Pawns.Add(lunyObject);
+			_globalInputActions.bindingMask = InputBinding.MaskByGroups(schemeNames);
 		}
 
 		private void ProcessInputEvent(InputAction.CallbackContext context)
 		{
-			LunyLogger.LogInfo($"ProcessInputEvent: {context.action.name}, {context.action.phase}", this);
+			//LunyLogger.LogInfo($"{context.control.device.name} => {context.action.name} ({context.action.phase})", nameof(ProcessInputEvent));
 			_lastUsedDevice = context.control.device;
 
 			var action = context.action;
@@ -320,5 +280,107 @@ namespace Luny.Unity.Engine.Services
 			else if (type == InputActionType.Button || layout == "Button")
 				SetButtonInput(context.action.name, false, 0f);
 		}
+
+		private void PairDeviceWithHost(InputDevice device)
+		{
+			var hostUser = GetHostUser();
+			if (hostUser.HasValue)
+				InputUser.PerformPairingWithDevice(device, hostUser.Value);
+		}
+
+		private void OnDeviceChange(InputDevice device, InputDeviceChange change)
+		{
+			LunyLogger.LogInfo($"{change} device: {device.name}", this);
+
+			switch (change)
+			{
+				case InputDeviceChange.Added:
+					// Automatically give new devices to the Host
+					PairDeviceWithHost(device);
+					break;
+				case InputDeviceChange.Removed:
+					var user = InputUser.FindUserPairedToDevice(device);
+					if (user.HasValue)
+						DestroyPlayerProfile(GetPlayerProfile(user.Value.id));
+					break;
+				case InputDeviceChange.Disconnected:
+					break;
+				case InputDeviceChange.Reconnected:
+					break;
+				case InputDeviceChange.Enabled:
+					break;
+				case InputDeviceChange.Disabled:
+					break;
+				// probably needn't be handled
+				case InputDeviceChange.UsageChanged:
+					break;
+				case InputDeviceChange.ConfigurationChanged:
+					break;
+				case InputDeviceChange.SoftReset:
+					break;
+				case InputDeviceChange.HardReset:
+					break;
+				// deprecated:
+				//case InputDeviceChange.Destroyed: break;
+				default:
+					LunyLogger.LogWarning($"Unhandled {nameof(InputDeviceChange)}: {change}");
+					break;
+			}
+		}
+
+		private void OnInputFromUnpairedDevice(InputControl control, InputEventPtr eventPtr)
+		{
+			LunyLogger.LogInfo($"Unpaired device: {control.device.name}");
+			PairDeviceWithHost(control.device);
+		}
+
+		protected override void OnServiceInitialize()
+		{
+			_globalInputActions = InputSystem.actions;
+			if (_globalInputActions == null)
+				LunyLogger.LogError("Project-wide Actions not assigned in: Project Settings / Input System Package", this);
+
+			_globalInputActions?.Disable();
+		}
+
+		protected override void OnServiceStartup()
+		{
+			CreateHostUserAndPairAllDevices();
+
+			// Tell the system to report activity from devices not yet "paired" to a user
+			InputUser.listenForUnpairedDeviceActivity++;
+			InputUser.onUnpairedDeviceUsed += OnInputFromUnpairedDevice;
+			InputSystem.onDeviceChange += OnDeviceChange;
+		}
+
+		protected override void OnServiceShutdown()
+		{
+			if (_globalInputActions == null)
+				return;
+
+			InputUser.listenForUnpairedDeviceActivity--;
+			InputUser.onUnpairedDeviceUsed -= OnInputFromUnpairedDevice;
+			InputSystem.onDeviceChange -= OnDeviceChange;
+
+			foreach (var profile in _inputProfiles.Values.ToArray())
+				DestroyPlayerProfile(profile);
+			_inputProfiles.Clear(); // just in case, it should be empty by now
+
+			// destroying profiles should have unpaired devices and removed users, nevertheless better err on the safe side
+			foreach (var inputUser in InputUser.all)
+			{
+				if (inputUser.valid)
+					inputUser.UnpairDevicesAndRemoveUser();
+			}
+
+			_globalInputActions.bindingMask = null; // reset back to default (w/o domain reload the last scheme sticks)
+			_globalInputActions.Disable();
+			_globalInputActions = null;
+		}
+	}
+
+	internal static class PlayerInputProfileExt
+	{
+		public static InputActionAsset GetActions(this PlayerInputProfile profile) => (InputActionAsset)profile.Actions;
 	}
 }
