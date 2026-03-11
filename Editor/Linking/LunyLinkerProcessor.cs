@@ -7,7 +7,7 @@ using UnityEditor.Build.Reporting;
 using UnityEditor.UnityLinker;
 using UnityEngine;
 
-namespace Luny.UnityEditor.Linking
+namespace Luny.UnityEditor
 {
 	public abstract class LunyLinkerProcessor : IUnityLinkerProcessor
 	{

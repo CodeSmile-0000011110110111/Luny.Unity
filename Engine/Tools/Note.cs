@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Luny.Unity.Engine.Tools
+namespace Luny.Unity.Engine
 {
 	public sealed class Note : MonoBehaviour
 	{

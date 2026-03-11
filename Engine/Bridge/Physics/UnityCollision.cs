@@ -3,7 +3,7 @@ using System;
 using UnityEngine;
 using Object = System.Object;
 
-namespace Luny.Unity.Engine.Bridge.Physics
+namespace Luny.Unity.Engine.Bridge
 {
 	public sealed class UnityCollision : LunyCollision
 	{

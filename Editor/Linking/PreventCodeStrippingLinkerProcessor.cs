@@ -1,8 +1,8 @@
-﻿using Luny.Engine;
+﻿using Luny.Engine.Services;
 using Luny.Unity.Engine;
 using System;
 
-namespace Luny.UnityEditor.Linking
+namespace Luny.UnityEditor
 {
 	internal sealed class PreventCodeStrippingLinkerProcessor : LunyLinkerProcessor
 	{

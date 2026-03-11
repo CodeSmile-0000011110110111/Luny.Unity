@@ -1,11 +1,11 @@
-﻿using Luny.Unity.Engine.Tools;
+﻿using Luny.Unity.Engine;
 using System;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor_Editor = UnityEditor.Editor;
 
-namespace Luny.UnityEditor.Tools
+namespace Luny.UnityEditor
 {
 	[CustomEditor(typeof(Note))]
 	public class NoteEditor : UnityEditor_Editor

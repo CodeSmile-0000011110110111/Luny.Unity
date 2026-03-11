@@ -1,6 +1,5 @@
 ﻿using Luny.Engine.Bridge;
 using Luny.Engine.Services;
-using Luny.Unity.Engine.Native;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,10 +20,10 @@ namespace Luny.Unity.Engine.Services
 		private InputActionAsset _globalInputActions;
 
 		// Key: InputUser.id
-		private Dictionary<UInt32, PlayerInputProfile> _playerProfiles = new();
+		private Dictionary<UInt32, LunyInputUserProfile> _playerProfiles = new();
 
 		private InputDevice _lastUsedDevice;
-		private PlayerInputProfile HostProfile { get; set; }
+		private LunyInputUserProfile HostProfile { get; set; }
 
 		private static InputUser? UnpairUserFromDevice(InputDevice device)
 		{
@@ -54,10 +53,10 @@ namespace Luny.Unity.Engine.Services
 
 		private InputUser? GetHostUser() => InputUser.all.Find(HostProfile.UserId);
 
-		private Boolean TryGetPlayerProfile(InputUser deviceUser, out PlayerInputProfile profile) =>
+		private Boolean TryGetPlayerProfile(InputUser deviceUser, out LunyInputUserProfile profile) =>
 			_playerProfiles.TryGetValue(deviceUser.id, out profile);
 
-		private PlayerInputProfile GetPlayerProfile(String userName)
+		private LunyInputUserProfile GetPlayerProfile(String userName)
 		{
 			foreach (var profile in _playerProfiles.Values)
 			{
@@ -67,7 +66,7 @@ namespace Luny.Unity.Engine.Services
 			return null;
 		}
 
-		private PlayerInputProfile GetPlayerProfile(UInt32 userId)
+		private LunyInputUserProfile GetPlayerProfile(UInt32 userId)
 		{
 			foreach (var profile in _playerProfiles.Values)
 			{
@@ -86,7 +85,7 @@ namespace Luny.Unity.Engine.Services
 				InputUser.PerformPairingWithDevice(device, hostUser);
 		}
 
-		private PlayerInputProfile CreatePlayerProfile(InputUser user, String userName)
+		private LunyInputUserProfile CreatePlayerProfile(InputUser user, String userName)
 		{
 			var userInputAsset = Object.Instantiate(_globalInputActions);
 
@@ -111,13 +110,13 @@ namespace Luny.Unity.Engine.Services
 			}
 
 			//var uiModules = GameObject.FindObjectsByType<InputSystemUIInputModule>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-			var profile = new PlayerInputProfile { UserId = user.id, UserName = userName, Actions = userInputAsset, UiInput = null };
+			var profile = new LunyInputUserProfile { UserId = user.id, UserName = userName, Actions = userInputAsset, UiInput = null };
 
 			LunyLogger.LogInfo($"User {user} is using actions: {userInputAsset.name}", this);
 			return profile;
 		}
 
-		private void DestroyPlayerProfile(PlayerInputProfile profile)
+		private void DestroyPlayerProfile(LunyInputUserProfile profile)
 		{
 			if (profile == null || profile.UserId == InputUser.InvalidId)
 				return;
@@ -229,7 +228,7 @@ namespace Luny.Unity.Engine.Services
 			pairedUser.Value.ActivateControlScheme(null);
 		}
 
-		public void SetControlSchemes(PlayerInputProfile profile, params String[] schemeNames)
+		public void SetControlSchemes(LunyInputUserProfile profile, params String[] schemeNames)
 		{
 			// This tells the Input System: "Only listen to bindings in this group"
 			// 'schemeName' must match the name in your InputSystem_Actions window exactly
@@ -412,6 +411,6 @@ namespace Luny.Unity.Engine.Services
 
 	internal static class PlayerInputProfileExt
 	{
-		public static InputActionAsset GetActions(this PlayerInputProfile profile) => (InputActionAsset)profile.Actions;
+		public static InputActionAsset GetActions(this LunyInputUserProfile profile) => (InputActionAsset)profile.Actions;
 	}
 }
