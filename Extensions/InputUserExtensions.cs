@@ -1,7 +1,7 @@
 ﻿using UnityEngine.InputSystem.Users;
 using UnityEngine.InputSystem.Utilities;
 
-namespace Luny.Unity.Engine
+namespace Luny.Unity
 {
 	public static class InputUserExtensions
 	{

@@ -2,9 +2,9 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Luny.Unity.Engine
+namespace Luny.Unity.Components
 {
-	public sealed class Note : MonoBehaviour
+	internal sealed class Note : MonoBehaviour
 	{
 #if UNITY_EDITOR
 		//[HideInInspector] public String Title = nameof(Note);
