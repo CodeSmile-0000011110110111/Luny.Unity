@@ -31,7 +31,7 @@ namespace Luny.UnityEditor
 			{
 				m_StdOutWriter = Console.Out;
 				Console.SetOut(new UnityConsoleWriter());
-				Debug.Log($"{nameof(CaptureStandardOutput)} enabled: Logs prefixed \"{LogPrefix}\" are Terminal logs (eg Console.Write).");
+				Debug.Log($"{nameof(CaptureStandardOutput)} enabled: \"{LogPrefix}\" prefixed logs are Terminal logs (eg Console.Write).");
 			}
 		}
 

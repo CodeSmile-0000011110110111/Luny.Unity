@@ -184,6 +184,8 @@ namespace Luny.Unity.Engine.Services
 			return pairedUser.Value.id == profile.UserId;
 		}
 
+		public override void EnableInputAction(String actionName, Boolean enabled) => throw new NotImplementedException(nameof(EnableInputAction));
+
 		public override void AssignUserToLastDevice(String userName, Int32 deviceId, ILunyObject lunyObject)
 		{
 			if (_lastUsedDevice == null)
