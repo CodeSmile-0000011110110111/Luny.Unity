@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
-namespace Luny.Unity.Engine.Bridge
+namespace Luny.Unity.Bridge
 {
 	/// <summary>
 	/// Unity-specific implementation wrapping UnityEngine.GameObject.

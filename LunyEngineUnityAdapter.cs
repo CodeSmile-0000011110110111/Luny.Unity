@@ -1,10 +1,9 @@
-﻿using Luny.Engine;
-using Luny.Engine.Bridge;
-using Luny.Unity.Engine.Bridge;
+﻿using Luny.Engine.Bridge;
+using Luny.Unity.Bridge;
 using System;
 using UnityEngine;
 
-namespace Luny.Unity.Engine
+namespace Luny.Unity
 {
 	/// <summary>
 	/// Engine hook. Provides no public or internal API.

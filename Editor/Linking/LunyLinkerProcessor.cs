@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Luny.UnityEditor
 {
-	public abstract class LunyLinkerProcessor : IUnityLinkerProcessor
+	internal abstract class LunyLinkerProcessor : IUnityLinkerProcessor
 	{
 		public Int32 callbackOrder => Int32.MaxValue;
 
@@ -76,7 +76,7 @@ namespace Luny.UnityEditor
 		public abstract PreserveDetails[] GetPreserveDetails();
 		public abstract String GetAssemblyName();
 
-		public struct PreserveDetails
+		internal struct PreserveDetails
 		{
 			public String Assembly;
 			public String[] Types;

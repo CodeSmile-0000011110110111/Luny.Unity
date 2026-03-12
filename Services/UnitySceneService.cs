@@ -1,14 +1,13 @@
 using Luny.Engine.Bridge;
 using Luny.Engine.Services;
-using Luny.Exceptions;
-using Luny.Unity.Engine.Bridge;
+using Luny.Unity.Bridge;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Luny.Unity.Engine.Services
+namespace Luny.Unity.Services
 {
 	/// <summary>
 	/// Unity implementation of scene information.

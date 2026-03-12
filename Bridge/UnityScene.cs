@@ -2,7 +2,7 @@
 using System;
 using UnityEngine.SceneManagement;
 
-namespace Luny.Unity.Engine.Bridge
+namespace Luny.Unity.Bridge
 {
 	public sealed class UnityScene : LunyScene
 	{

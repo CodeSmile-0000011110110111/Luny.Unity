@@ -1,10 +1,10 @@
 ﻿using Luny.Engine.Bridge;
 using Luny.Engine.Services;
-using Luny.Unity.Engine.Bridge;
+using Luny.Unity.Bridge;
 using System;
 using UnityEngine;
 
-namespace Luny.Unity.Engine.Services
+namespace Luny.Unity.Services
 {
 	public sealed class UnityObjectService : LunyObjectServiceBase, ILunyObjectService
 	{

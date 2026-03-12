@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Object = System.Object;
 
-namespace Luny.Unity.Engine.Bridge
+namespace Luny.Unity.Bridge
 {
 	internal sealed class UnityTransform : LunyTransform
 	{

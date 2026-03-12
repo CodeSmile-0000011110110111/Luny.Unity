@@ -9,7 +9,7 @@ using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.InputSystem.Users;
 using Object = UnityEngine.Object;
 
-namespace Luny.Unity.Engine.Services
+namespace Luny.Unity.Services
 {
 	/// <summary>
 	/// Unity implementation of input service.

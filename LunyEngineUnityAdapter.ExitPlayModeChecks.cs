@@ -1,10 +1,10 @@
 #if UNITY_EDITOR
-using Luny.Unity.Engine.Bridge;
+using Luny.Unity.Bridge;
 using System;
 using UnityEditor;
 using UnityEngine;
 
-namespace Luny.Unity.Engine
+namespace Luny.Unity
 {
 	internal sealed partial class LunyEngineUnityAdapter
 	{

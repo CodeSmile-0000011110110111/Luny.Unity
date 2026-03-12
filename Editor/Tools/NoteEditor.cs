@@ -1,5 +1,4 @@
 ﻿using Luny.Unity.Components;
-using Luny.Unity.Engine;
 using System;
 using UnityEditor;
 using UnityEngine;
@@ -9,7 +8,7 @@ using UnityEditor_Editor = UnityEditor.Editor;
 namespace Luny.UnityEditor
 {
 	[CustomEditor(typeof(Note))]
-	public class NoteEditor : UnityEditor_Editor
+	internal class NoteEditor : UnityEditor_Editor
 	{
 		private static String GetNoteTitle(HelpBoxMessageType messageType)
 		{

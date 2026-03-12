@@ -1,7 +1,7 @@
 ﻿using Luny.Engine.Services;
 using UnityEngine;
 
-namespace Luny.Unity.Engine.Services
+namespace Luny.Unity.Services
 {
 	/// <summary>
 	/// Unity implementation of Debug.

@@ -2,7 +2,7 @@ using Luny.Engine.Bridge;
 using System;
 using UnityEngine;
 
-namespace Luny.Unity.Engine.Bridge
+namespace Luny.Unity.Bridge
 {
 	public sealed class UnityCollider : LunyCollider
 	{
