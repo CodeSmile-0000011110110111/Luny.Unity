@@ -31,7 +31,7 @@ namespace Luny.Unity.Bridge
 		{
 			get
 			{
-				if (!IsNativeObjectValid())
+				if (!IsNativeObjectReferenceValid())
 					return null;
 
 				return (GameObject)NativeObject;
@@ -126,7 +126,7 @@ namespace Luny.Unity.Bridge
 		protected override void DestroyNativeObject() => Object.Destroy(GO); // Destroy handles null parameters
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected override Boolean IsNativeObjectValid()
+		protected override Boolean IsNativeObjectReferenceValid()
 		{
 			var go = NativeObject as GameObject; // must use NativeObject here to avoid stackoverflow
 			return go != null;
