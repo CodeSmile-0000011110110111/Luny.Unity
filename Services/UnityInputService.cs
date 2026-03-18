@@ -183,7 +183,8 @@ namespace Luny.Unity.Services
 			return pairedUser.Value.id == profile.UserId;
 		}
 
-		public override void EnableInputAction(String actionName, Boolean enabled) => throw new NotImplementedException(nameof(EnableInputAction));
+		public override void EnableInputAction(String actionName, Boolean enabled) =>
+			throw new NotImplementedException(nameof(EnableInputAction));
 
 		public override void AssignUserToLastDevice(String userName, Int32 deviceId, ILunyObject lunyObject)
 		{
@@ -318,15 +319,15 @@ namespace Luny.Unity.Services
 
 		private void OnDeviceChange(InputDevice device, InputDeviceChange change)
 		{
-			LunyLogger.LogInfo($"{change} device: {device.name}", this);
-
 			switch (change)
 			{
 				case InputDeviceChange.Added:
+					LogDeviceChange(device, change);
 					// Automatically give new devices to the Host
 					PairDeviceWithHost(device);
 					break;
 				case InputDeviceChange.Removed:
+					LogDeviceChange(device, change);
 					var user = InputUser.FindUserPairedToDevice(device);
 					if (user.HasValue)
 						DestroyPlayerProfile(GetPlayerProfile(user.Value.id));
@@ -355,6 +356,9 @@ namespace Luny.Unity.Services
 					break;
 			}
 		}
+
+		private void LogDeviceChange(InputDevice device, InputDeviceChange change) =>
+			LunyLogger.LogInfo($"{change} device: {device.name}", this);
 
 		private void OnInputFromUnpairedDevice(InputControl control, InputEventPtr eventPtr)
 		{
