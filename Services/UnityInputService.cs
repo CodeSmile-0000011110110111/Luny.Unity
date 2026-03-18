@@ -183,8 +183,35 @@ namespace Luny.Unity.Services
 			return pairedUser.Value.id == profile.UserId;
 		}
 
-		public override void EnableInputAction(String actionName, Boolean enabled) =>
-			throw new NotImplementedException(nameof(EnableInputAction));
+		public override void EnableInputAction(String actionName, Boolean enable)
+		{
+			var action = _globalInputActions.FindAction(actionName);
+			if (action == null)
+			{
+				EnableInputActionMap(actionName, enable);
+				return;
+			}
+
+			if (action.enabled == enable)
+				return;
+
+			if (enable)
+				action.Enable();
+			else
+				action.Disable();
+		}
+
+		private void EnableInputActionMap(String actionName, Boolean enable)
+		{
+			var map = _globalInputActions.FindActionMap(actionName);
+			if (map == null || map.enabled == enable)
+				return;
+
+			if (enable)
+				map.Enable();
+			else
+				map.Disable();
+		}
 
 		public override void AssignUserToLastDevice(String userName, Int32 deviceId, ILunyObject lunyObject)
 		{
