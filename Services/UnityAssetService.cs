@@ -65,8 +65,8 @@ namespace Luny.Unity.Services
 				go.AddComponent<BoxCollider>();
 				go.AddComponent<Rigidbody>();
 				go.hideFlags = HideFlags.HideAndDontSave | HideFlags.HideInInspector;
-				go.name = $"N/A: {path}";
-				return new UnityPrefab(go, path) as T;
+				go.name = $"Placeholder('{path}')";
+				return new UnityPrefab(go, path, true) as T;
 			}
 			return null;
 		}

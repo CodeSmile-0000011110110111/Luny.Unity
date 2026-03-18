@@ -1,14 +1,25 @@
 using Luny.Engine.Bridge;
+using System;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Luny.Unity.Bridge
 {
 	public sealed class UnityPrefab : LunyPrefab
 	{
+		private Boolean _isPlaceholder;
+
 		private static void SetInstanceName(GameObject instance) => instance.name = instance.name.Replace("(Clone)", "");
 
-		public UnityPrefab(GameObject prefab, LunyAssetPath assetPath)
-			: base(prefab, assetPath) {}
+		public UnityPrefab(GameObject prefab, LunyAssetPath assetPath, Boolean isPlaceholder = false)
+			: base(prefab, assetPath) => _isPlaceholder = isPlaceholder;
+
+		private void ResetPlaceholderProperties(GameObject go)
+		{
+			go.hideFlags = HideFlags.None;
+			go.transform.localRotation = Quaternion.Euler(45f, 45f, 45f);
+			go.SetActive(true);
+		}
 
 		public override T Instantiate<T>(ILunyObject parent)
 		{
@@ -18,6 +29,8 @@ namespace Luny.Unity.Bridge
 				: Object.Instantiate(unityPrefab);
 
 			SetInstanceName(instance);
+			if (_isPlaceholder)
+				ResetPlaceholderProperties(instance);
 			return instance as T;
 		}
 
@@ -29,6 +42,8 @@ namespace Luny.Unity.Bridge
 				: Object.Instantiate(unityPrefab, position, rotation);
 
 			SetInstanceName(instance);
+			if (_isPlaceholder)
+				ResetPlaceholderProperties(instance);
 			return instance;
 		}
 
