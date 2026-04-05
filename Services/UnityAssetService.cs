@@ -17,11 +17,13 @@ namespace Luny.Unity.Services
 		{
 			//LunyLogger.LogInfo($"Try load asset path: {path.NativePath}", this);
 
-			Object asset;
+			Object asset = null;
 			var nativePath = path.NativePath;
 			if (nativePath.StartsWith("Assets/") || nativePath.StartsWith("Packages/"))
 			{
+#if UNITY_EDITOR
 				asset = AssetDatabase.LoadAssetAtPath<Object>(nativePath);
+#endif
 
 				if (asset != null)
 					LunyLogger.LogWarning($"Using Asset path '{nativePath}' currently only works in Editor, not in builds!", this);

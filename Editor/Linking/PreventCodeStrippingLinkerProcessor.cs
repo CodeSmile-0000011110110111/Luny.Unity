@@ -10,10 +10,12 @@ namespace Luny.UnityEditor
 		{
 			// Engine services are discovered through reflection
 			var details = PreserveAllDerivedClasses<ILunyEngineService>();
+			var observers = PreserveAllDerivedClasses<ILunyEngineObserver>();
+			details.AddRange(observers);
 
 			details.Add(new PreserveDetails
 			{
-				Assembly = $"{nameof(Luny)}.{nameof(Unity)}",
+				Assembly = GetAssemblyName(),
 				Types = new[]
 				{
 					// lifecycle is using [RuntimeInitializeOnLoadMethod]
@@ -24,6 +26,6 @@ namespace Luny.UnityEditor
 			return details.ToArray();
 		}
 
-		public override String GetAssemblyName() => $"{nameof(Luny)}.Unity";
+		public override String GetAssemblyName() => "Luny.Unity";
 	}
 }

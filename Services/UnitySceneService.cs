@@ -70,7 +70,7 @@ namespace Luny.Unity.Services
 				throw new LunyServiceException("Cannot launch Luny in an 'Untitled' (unsaved) scene. Save the scene, then try again!");
 
 			CurrentScene = new UnityScene(activeScene);
-			LunyLogger.LogInfo($"{nameof(OnServiceInitialize)}: CurrentScene={CurrentScene}", this);
+			LunyLogger.LogInfo($"{nameof(OnServiceStartup)}: CurrentScene={CurrentScene}", this);
 
 			InvokeOnSceneLoaded(CurrentScene);
 		}
@@ -84,10 +84,12 @@ namespace Luny.Unity.Services
 
 		private void OnNativeSceneLoaded(Scene scene, LoadSceneMode loadMode)
 		{
+			LunyLogger.LogInfo($"OnNativeSceneLoaded: {scene.path} in frame {Time.frameCount}", this);
+
 			if (loadMode == LoadSceneMode.Single)
 				CurrentScene = new UnityScene(scene);
 			else
-				throw new NotImplementedException("additive scene load not yet supported");
+				LunyLogger.LogWarning($"additive scene load not yet supported: {scene.path}");
 
 			LunyLogger.LogInfo("-----------------------------------------------------------------------------------------------------", this);
 			LunyLogger.LogInfo($"{nameof(OnNativeSceneLoaded)}: {CurrentScene} => {ToString()}", this);
