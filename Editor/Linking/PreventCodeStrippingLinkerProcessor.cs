@@ -1,5 +1,4 @@
 ﻿using Luny.Engine.Services;
-using Luny.Unity;
 using System;
 
 namespace Luny.UnityEditor
@@ -12,17 +11,8 @@ namespace Luny.UnityEditor
 			var details = PreserveAllDerivedClasses<ILunyEngineService>();
 			var observers = PreserveAllDerivedClasses<ILunyEngineObserver>();
 			details.AddRange(observers);
-
-			details.Add(new PreserveDetails
-			{
-				Assembly = GetAssemblyName(),
-				Types = new[]
-				{
-					// lifecycle is using [RuntimeInitializeOnLoadMethod]
-					typeof(LunyEngineUnityAdapter).FullName,
-				},
-			});
-
+			var adapters = PreserveAllDerivedClasses<ILunyEngineNativeAdapter>();
+			details.AddRange(adapters);
 			return details.ToArray();
 		}
 
