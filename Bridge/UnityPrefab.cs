@@ -25,7 +25,7 @@ namespace Luny.Unity.Bridge
 		{
 			var unityPrefab = Cast<GameObject>();
 			var instance = parent != null && parent.IsValid
-				? Object.Instantiate(unityPrefab, parent.Transform.As<Transform>())
+				? Object.Instantiate(unityPrefab, parent.Transform.Cast<Transform>())
 				: Object.Instantiate(unityPrefab);
 
 			SetInstanceName(instance);

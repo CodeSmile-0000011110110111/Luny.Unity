@@ -23,7 +23,8 @@ namespace Luny.Unity.Services
 		private Dictionary<UInt32, LunyInputUserProfile> _playerProfiles = new();
 
 		private InputDevice _lastUsedDevice;
-		private LunyInputUserProfile HostProfile { get; set; }
+		private LunyInputUserProfile HostProfile => _playerProfiles[_hostProfileUserId];
+		private uint _hostProfileUserId;
 
 		private static InputUser? UnpairUserFromDevice(InputDevice device)
 		{
@@ -79,7 +80,9 @@ namespace Luny.Unity.Services
 		private void CreateHostUserAndPairAllDevices()
 		{
 			var hostUser = InputUser.CreateUserWithoutPairedDevices();
-			HostProfile = CreatePlayerProfile(hostUser, "{InputHost}");
+			var hostProfile = CreatePlayerProfile(hostUser, "{Input Host}");
+			_hostProfileUserId = hostProfile.UserId;
+			_playerProfiles.Add(_hostProfileUserId, hostProfile);
 
 			foreach (var device in InputSystem.devices)
 				InputUser.PerformPairingWithDevice(device, hostUser);
@@ -183,34 +186,48 @@ namespace Luny.Unity.Services
 			return pairedUser.Value.id == profile.UserId;
 		}
 
-		public override void EnableInputAction(String actionName, Boolean enable)
+		public override void EnableInputAction(String actionName) => SetInputActionEnabledState(actionName, true);
+
+		public override void DisableInputAction(String actionName) => SetInputActionEnabledState(actionName, false);
+
+		private void SetInputActionEnabledState(String actionName, Boolean enable)
 		{
-			var action = _globalInputActions.FindAction(actionName);
-			if (action == null)
+			foreach (var playerProfile in _playerProfiles.Values)
 			{
-				EnableInputActionMap(actionName, enable);
-				return;
+				var inputActions = (InputActionAsset)playerProfile.Actions;
+
+				var action = inputActions.FindAction(actionName);
+				if (action == null)
+				{
+					SetInputActionMapEnabledState(actionName, enable);
+					return;
+				}
+
+				if (action.enabled == enable)
+					return;
+
+				if (enable)
+					action.Enable();
+				else
+					action.Disable();
 			}
-
-			if (action.enabled == enable)
-				return;
-
-			if (enable)
-				action.Enable();
-			else
-				action.Disable();
 		}
 
-		private void EnableInputActionMap(String actionName, Boolean enable)
+		private void SetInputActionMapEnabledState(String actionName, Boolean enable)
 		{
-			var map = _globalInputActions.FindActionMap(actionName);
-			if (map == null || map.enabled == enable)
-				return;
+			foreach (var playerProfile in _playerProfiles.Values)
+			{
+				var inputActions = (InputActionAsset)playerProfile.Actions;
 
-			if (enable)
-				map.Enable();
-			else
-				map.Disable();
+				var map = inputActions.FindActionMap(actionName);
+				if (map == null || map.enabled == enable)
+					return;
+
+				if (enable)
+					map.Enable();
+				else
+					map.Disable();
+			}
 		}
 
 		public override void AssignUserToLastDevice(String userName, Int32 deviceId, ILunyObject lunyObject)
@@ -424,8 +441,6 @@ namespace Luny.Unity.Services
 			foreach (var profile in _playerProfiles.Values.ToArray())
 				DestroyPlayerProfile(profile);
 			_playerProfiles.Clear(); // just in case, it should be empty by now
-
-			DestroyPlayerProfile(HostProfile);
 
 			// destroying profiles should have unpaired devices and removed users, nevertheless better err on the safe side
 			foreach (var inputUser in InputUser.all)

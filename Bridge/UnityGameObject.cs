@@ -112,7 +112,7 @@ namespace Luny.Unity.Bridge
 
 		public override ILunyObject Clone() => ToLunyObject(Object.Instantiate(GO));
 
-		public override ILunyObject Clone(LunyTransform parent) => ToLunyObject(Object.Instantiate(GO, parent.As<Transform>()));
+		public override ILunyObject Clone(LunyTransform parent) => ToLunyObject(Object.Instantiate(GO, parent.Cast<Transform>()));
 
 		protected override LunyTransform GetNativeTransform()
 		{

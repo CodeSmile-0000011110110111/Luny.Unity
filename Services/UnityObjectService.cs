@@ -80,7 +80,7 @@ namespace Luny.Unity.Services
 
 			var pos = position?.ToUnity() ?? Vector3.zero;
 			var rot = rotation?.ToUnity() ?? Quaternion.identity;
-			var go = unityPrefab.Instantiate(parent?.Transform?.As<Transform>(), pos, rot);
+			var go = unityPrefab.Instantiate(parent?.Transform?.Cast<Transform>(), pos, rot);
 			if (scale.HasValue)
 				go.transform.localScale = scale.Value.ToUnity();
 			return UnityGameObject.ToLunyObject(go);
