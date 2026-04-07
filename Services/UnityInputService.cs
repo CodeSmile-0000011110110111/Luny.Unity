@@ -1,5 +1,6 @@
 ﻿using Luny.Engine.Bridge;
 using Luny.Engine.Services;
+using Luny.Unity.Bridge;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,8 +24,8 @@ namespace Luny.Unity.Services
 		private Dictionary<UInt32, LunyInputUserProfile> _playerProfiles = new();
 
 		private InputDevice _lastUsedDevice;
+		private UInt32 _hostProfileUserId;
 		private LunyInputUserProfile HostProfile => _playerProfiles[_hostProfileUserId];
-		private uint _hostProfileUserId;
 
 		private static InputUser? UnpairUserFromDevice(InputDevice device)
 		{
@@ -306,6 +307,17 @@ namespace Luny.Unity.Services
 			inputEvent.UserName = GetUserName(_lastUsedDevice);
 			inputEvent.DeviceId = _lastUsedDevice.deviceId;
 			inputEvent.Phase = (LunyInputActionPhase)context.phase;
+
+			var valueType = context.valueType;
+			inputEvent.Value = valueType switch
+			{
+				_ when valueType == typeof(bool)    => new LunyVector3(context.ReadValue<bool>() ? 1f : 0f),
+				_ when valueType == typeof(float)   => new LunyVector3(context.ReadValue<float>()),
+				_ when valueType == typeof(Vector2) => context.ReadValue<Vector2>().ToLuny(),
+				_ when valueType == typeof(Vector3) => context.ReadValue<Vector3>().ToLuny(),
+				_ => throw new ArgumentOutOfRangeException(nameof(valueType), $"Unhandled input value type: {valueType}")
+			};
+
 			HandleInputActionEvent(inputEvent);
 		}
 
