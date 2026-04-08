@@ -118,19 +118,19 @@ namespace Luny.Unity.Bridge
 		public override void LookAt(ILunyObject target, LunyVector3 worldUp) =>
 			_nativeTransform.LookAt(target.Transform.Position.ToUnity(), worldUp.ToUnity());
 
-		public override void Rotate(LunyVector3 eulerAngles, LunyTransformSpace space = LunyTransformSpace.Self) =>
+		public override void Rotate(LunyVector3 eulerAngles, LunyTransformSpace space = LunyTransformSpace.Local) =>
 			_nativeTransform.Rotate(eulerAngles.ToUnity(), (Space)space);
 
-		public override void Rotate(LunyVector3 axis, Double angle, LunyTransformSpace space = LunyTransformSpace.Self) =>
+		public override void Rotate(LunyVector3 axis, Double angle, LunyTransformSpace space = LunyTransformSpace.Local) =>
 			_nativeTransform.Rotate(axis.ToUnity(), (Single)angle, (Space)space);
 
 		public override void RotateAround(LunyVector3 worldPoint, LunyVector3 axis, Double angle) =>
 			_nativeTransform.RotateAround(worldPoint.ToUnity(), axis.ToUnity(), (Single)angle);
 
-		public override void Translate(LunyVector2 translation, LunyTransformSpace space = LunyTransformSpace.Self) =>
+		public override void Translate(LunyVector2 translation, LunyTransformSpace space = LunyTransformSpace.Local) =>
 			_nativeTransform.Translate(new Vector3(translation.X, 0, translation.Y), (Space)space);
 
-		public override void Translate(LunyVector3 translation, LunyTransformSpace space = LunyTransformSpace.Self) =>
+		public override void Translate(LunyVector3 translation, LunyTransformSpace space = LunyTransformSpace.Local) =>
 			_nativeTransform.Translate(translation.ToUnity(), (Space)space);
 	}
 }
