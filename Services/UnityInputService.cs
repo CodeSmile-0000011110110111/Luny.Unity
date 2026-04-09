@@ -311,11 +311,11 @@ namespace Luny.Unity.Services
 			var valueType = context.valueType;
 			inputEvent.Value = valueType switch
 			{
-				_ when valueType == typeof(bool)    => new LunyVector3(context.ReadValue<bool>() ? 1f : 0f),
-				_ when valueType == typeof(float)   => new LunyVector3(context.ReadValue<float>()),
-				_ when valueType == typeof(Vector2) => context.ReadValue<Vector2>().ToLuny(),
-				_ when valueType == typeof(Vector3) => context.ReadValue<Vector3>().ToLuny(),
-				_ => throw new ArgumentOutOfRangeException(nameof(valueType), $"Unhandled input value type: {valueType}")
+				var _ when valueType == typeof(Boolean) => new LunyVector3(context.ReadValue<Boolean>() ? 1f : 0f),
+				var _ when valueType == typeof(Single) => new LunyVector3(context.ReadValue<Single>()),
+				var _ when valueType == typeof(Vector2) => context.ReadValue<Vector2>().ToLuny(),
+				var _ when valueType == typeof(Vector3) => context.ReadValue<Vector3>().ToLuny(),
+				var _ => throw new ArgumentOutOfRangeException(nameof(valueType), $"Unhandled input value type: {valueType}"),
 			};
 
 			HandleInputActionEvent(inputEvent);

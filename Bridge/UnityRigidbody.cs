@@ -8,6 +8,15 @@ namespace Luny.Unity.Bridge
 	{
 		private readonly Rigidbody _rigidbody;
 
+		private static ForceMode ToUnityForceMode(LunyForceMode forceMode) => forceMode switch
+		{
+			LunyForceMode.Force => ForceMode.Force,
+			LunyForceMode.Acceleration => ForceMode.Acceleration,
+			LunyForceMode.Impulse => ForceMode.Impulse,
+			LunyForceMode.VelocityChange => ForceMode.VelocityChange,
+			var _ => ForceMode.Force,
+		};
+
 		internal UnityRigidbody(ILunyObject owner, Rigidbody rigidbody)
 			: base(owner) => _rigidbody = rigidbody;
 
@@ -54,14 +63,5 @@ namespace Luny.Unity.Bridge
 			else
 				_rigidbody.AddTorque(torque.ToUnity(), unityForceMode);
 		}
-
-		private static ForceMode ToUnityForceMode(LunyForceMode forceMode) => forceMode switch
-		{
-			LunyForceMode.Force => ForceMode.Force,
-			LunyForceMode.Acceleration => ForceMode.Acceleration,
-			LunyForceMode.Impulse => ForceMode.Impulse,
-			LunyForceMode.VelocityChange => ForceMode.VelocityChange,
-			_ => ForceMode.Force,
-		};
 	}
 }

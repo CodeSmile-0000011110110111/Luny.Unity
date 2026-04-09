@@ -23,7 +23,7 @@ namespace Luny.Unity.Services
 
 				// sync rigidbody in case of: a) interpolation enabled and b) instantiated outside of FixedUpdate
 				if (hasRigidbody)
-				 	rigidbody.position = transform.position;
+					rigidbody.position = transform.position;
 				else if (hasRigidbody2D)
 				{
 					var pos = transform.position;

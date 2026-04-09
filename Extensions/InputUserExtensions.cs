@@ -1,11 +1,12 @@
-﻿using UnityEngine.InputSystem.Users;
+﻿using System;
+using UnityEngine.InputSystem.Users;
 using UnityEngine.InputSystem.Utilities;
 
 namespace Luny.Unity
 {
 	internal static class InputUserExtensions
 	{
-		public static InputUser? Find(this ReadOnlyArray<InputUser> users, uint id)
+		public static InputUser? Find(this ReadOnlyArray<InputUser> users, UInt32 id)
 		{
 			foreach (var user in users)
 			{
@@ -14,6 +15,5 @@ namespace Luny.Unity
 			}
 			return null;
 		}
-
 	}
 }
