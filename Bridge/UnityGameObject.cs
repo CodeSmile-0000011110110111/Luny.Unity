@@ -13,20 +13,11 @@ namespace Luny.Unity.Bridge
 	internal sealed class UnityGameObject : LunyObject
 	{
 		private Renderer _renderer;
-		private Renderer Renderer
-		{
-			get
-			{
-				if (_renderer != null)
-					return _renderer;
+		private UnityTransform _transform;
+		private UnityRigidbody _rigidbody;
 
-				var go = GO;
-				if (go == null)
-					return null;
+		private Renderer Renderer => GetNativeRenderer();
 
-				return go.TryGetComponent(out _renderer) ? _renderer : null;
-			}
-		}
 		private GameObject GO
 		{
 			get
@@ -69,11 +60,24 @@ namespace Luny.Unity.Bridge
 			return ToLunyObject(foundObject);
 		}
 
+		internal static ILunyObject FindNativeChildObject(ILunyObject parent, String name)
+		{
+			var parentTransform = parent?.Transform?.Cast<Transform>();
+			if (parentTransform == null)
+				return null;
+
+			var found = FindChildRecursive(parentTransform, name);
+			if (found == null || found == parentTransform)
+				return null;
+
+			return ToLunyObject(found.gameObject);
+		}
+
 		private static GameObject FindInactive(String name)
 		{
 			foreach (var root in SceneManager.GetActiveScene().GetRootGameObjects())
 			{
-				var found = FindRecursive(root.transform, name);
+				var found = FindChildRecursive(root.transform, name);
 				if (found != null)
 					return found.gameObject;
 			}
@@ -81,14 +85,14 @@ namespace Luny.Unity.Bridge
 			return null;
 		}
 
-		private static Transform FindRecursive(Transform parent, String name)
+		private static Transform FindChildRecursive(Transform parent, String name)
 		{
 			if (parent.name == name)
 				return parent;
 
 			foreach (Transform child in parent)
 			{
-				var found = FindRecursive(child, name);
+				var found = FindChildRecursive(child, name);
 				if (found != null)
 					return found;
 			}
@@ -114,21 +118,59 @@ namespace Luny.Unity.Bridge
 
 		public override ILunyObject Clone(LunyTransform parent) => ToLunyObject(Object.Instantiate(GO, parent.Cast<Transform>()));
 
-		protected override LunyTransform GetNativeTransform()
+		private Renderer GetNativeRenderer()
 		{
+			if (_renderer != null)
+				return _renderer;
+
 			var go = GO;
 			if (go == null)
 				return null;
 
-			return new UnityTransform(go.transform);
+			return go.TryGetComponent(out _renderer) ? _renderer : null;
 		}
 
-		protected override void DestroyNativeObject() => Object.Destroy(GO); // Destroy handles null parameters
+		protected override LunyRigidbody GetNativeRigidbody()
+		{
+			if (_rigidbody != null)
+				return _rigidbody;
+
+			var go = GO;
+			if (go == null)
+				return null;
+
+			if (!go.TryGetComponent<Rigidbody>(out var rb))
+			{
+				LunyLogger.LogWarning($"{nameof(GetNativeRigidbody)}: no {nameof(Rigidbody)} component on '{Name}'", this);
+				return null;
+			}
+			return _rigidbody = new UnityRigidbody(this, rb);
+		}
+
+		protected override LunyTransform GetNativeTransform()
+		{
+			if (_transform != null)
+				return _transform;
+
+			var go = GO;
+			if (go == null)
+				return null;
+
+			return _transform = new UnityTransform(go.transform);
+		}
+
+		protected override void DestroyNativeObject()
+		{
+			_renderer = null;
+			_rigidbody = null;
+			_transform = null;
+			Object.Destroy(GO); // Destroy doesn't mind if GO were already null
+		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected override Boolean IsNativeObjectReferenceValid()
 		{
-			var go = NativeObject as GameObject; // must use NativeObject here to avoid stackoverflow
+			var go = As<GameObject>(); // must use As<> here (instead of GO property) to avoid stackoverflow
 			return go != null;
 		}
 

@@ -33,7 +33,7 @@ namespace Luny.Unity.Services
 					foundObjects.Add(lunyObject);
 				}
 
-				// check all children recursively => getting their Transform is shorthand
+				// check all children (including inactive) recursively => getting their Transform is shorthand
 				var transforms = rootObj.GetComponentsInChildren<Transform>(true);
 				foreach (var transform in transforms)
 				{
@@ -55,6 +55,14 @@ namespace Luny.Unity.Services
 				return null;
 
 			return UnityGameObject.FindNativeObject(name);
+		}
+
+		public override ILunyObject FindChildByName(ILunyObject parent, String name)
+		{
+			if (parent == null || String.IsNullOrEmpty(name))
+				return null;
+
+			return UnityGameObject.FindNativeChildObject(parent, name);
 		}
 
 		protected override void OnServiceInitialize()
