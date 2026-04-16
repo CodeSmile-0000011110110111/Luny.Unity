@@ -4,9 +4,25 @@ using UnityEngine;
 
 namespace Luny.Unity.Bridge
 {
+	public static class LunyInterpolationExtensions
+	{
+		public static LunyRigidbodyInterpolation ToLuny(this RigidbodyInterpolation ip) => (LunyRigidbodyInterpolation)ip;
+		public static RigidbodyInterpolation FromLuny(this LunyRigidbodyInterpolation ip) => (RigidbodyInterpolation)ip;
+	}
+
 	internal sealed class UnityRigidbody : LunyRigidbody
 	{
 		private readonly Rigidbody _rigidbody;
+
+		public override Boolean IsKinematic { get => _rigidbody.isKinematic; set => _rigidbody.isKinematic = value; }
+
+		public override Boolean UseGravity { get => _rigidbody.useGravity; set => _rigidbody.useGravity = value; }
+
+		public override LunyRigidbodyInterpolation Interpolation
+		{
+			get => _rigidbody.interpolation.ToLuny();
+			set => _rigidbody.interpolation = value.FromLuny();
+		}
 
 		private static ForceMode ToUnityForceMode(LunyForceMode forceMode) => forceMode switch
 		{
@@ -14,15 +30,11 @@ namespace Luny.Unity.Bridge
 			LunyForceMode.Acceleration => ForceMode.Acceleration,
 			LunyForceMode.Impulse => ForceMode.Impulse,
 			LunyForceMode.VelocityChange => ForceMode.VelocityChange,
-			var _ => ForceMode.Force,
+			var _ => throw new ArgumentOutOfRangeException(nameof(forceMode), $"unhandled ForceMode: {forceMode}"),
 		};
 
 		internal UnityRigidbody(ILunyObject owner, Rigidbody rigidbody)
 			: base(owner) => _rigidbody = rigidbody;
-
-		public override void SetKinematic(Boolean enabled) => _rigidbody.isKinematic = enabled;
-
-		public override void SetGravityEnabled(Boolean enabled) => _rigidbody.useGravity = enabled;
 
 		public override void MovePosition(LunyVector3 delta, LunyTransformSpace space)
 		{
