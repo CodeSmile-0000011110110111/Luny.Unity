@@ -6,7 +6,7 @@ using Object = System.Object;
 
 namespace Luny.Unity.Bridge
 {
-	internal sealed class UnityTransform : LunyTransform
+	public sealed class UnityTransform : LunyTransform
 	{
 		private readonly Transform _nativeTransform;
 
@@ -113,9 +113,9 @@ namespace Luny.Unity.Bridge
 		public override void LookAt(LunyVector3 worldPosition, LunyVector3 worldUp) =>
 			_nativeTransform.LookAt(worldPosition.ToUnity(), worldUp.ToUnity());
 
-		public override void LookAt(ILunyObject target) => _nativeTransform.LookAt(target.Transform.Position.ToUnity());
+		public override void LookAt(ILunyGameObject target) => _nativeTransform.LookAt(target.Transform.Position.ToUnity());
 
-		public override void LookAt(ILunyObject target, LunyVector3 worldUp) =>
+		public override void LookAt(ILunyGameObject target, LunyVector3 worldUp) =>
 			_nativeTransform.LookAt(target.Transform.Position.ToUnity(), worldUp.ToUnity());
 
 		public override void Rotate(LunyVector3 eulerAngles, LunyTransformSpace space = LunyTransformSpace.Local) =>

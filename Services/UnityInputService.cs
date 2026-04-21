@@ -231,7 +231,7 @@ namespace Luny.Unity.Services
 			}
 		}
 
-		public override void AssignUserToLastDevice(String userName, Int32 deviceId, ILunyObject lunyObject)
+		public override void AssignUserToLastDevice(String userName, Int32 deviceId, ILunyGameObject lunyGameObject)
 		{
 			if (_lastUsedDevice == null)
 			{
@@ -239,10 +239,10 @@ namespace Luny.Unity.Services
 				return;
 			}
 
-			AssignUserToDevice(userName, _lastUsedDevice, lunyObject);
+			AssignUserToDevice(userName, _lastUsedDevice, lunyGameObject);
 		}
 
-		private void AssignUserToDevice(String userName, InputDevice device, ILunyObject lunyObject)
+		private void AssignUserToDevice(String userName, InputDevice device, ILunyGameObject lunyGameObject)
 		{
 			if (TryGetPairedUser(device, out var pairedUser) && pairedUser.Value.id != HostProfile.UserId)
 			{
@@ -270,7 +270,7 @@ namespace Luny.Unity.Services
 				_playerProfiles.Add(profile.UserId, profile);
 			}
 
-			profile.Pawns.Add(lunyObject);
+			profile.Pawns.Add(lunyGameObject);
 			pairedUser.Value.ActivateControlScheme(null);
 		}
 

@@ -10,7 +10,7 @@ namespace Luny.Unity.Bridge
 		public static RigidbodyInterpolation FromLuny(this LunyRigidbodyInterpolation ip) => (RigidbodyInterpolation)ip;
 	}
 
-	internal sealed class UnityRigidbody : LunyRigidbody
+	public sealed class UnityRigidbody : LunyRigidbody
 	{
 		private readonly Rigidbody _rigidbody;
 
@@ -33,7 +33,7 @@ namespace Luny.Unity.Bridge
 			var _ => throw new ArgumentOutOfRangeException(nameof(forceMode), $"unhandled ForceMode: {forceMode}"),
 		};
 
-		internal UnityRigidbody(ILunyObject owner, Rigidbody rigidbody)
+		internal UnityRigidbody(ILunyGameObject owner, Rigidbody rigidbody)
 			: base(owner) => _rigidbody = rigidbody;
 
 		public override void MovePosition(LunyVector3 delta, LunyTransformSpace space)
