@@ -36,7 +36,7 @@ namespace Luny.Unity.Bridge
 		/// <param name="gameObject">A valid GameObject instance. The parameter is System.Object on purpose: Unity Console message double-click will not open the topmost line of the callstack otherwise for some reason.</param>
 		/// <returns></returns>
 		/// <exception cref="ArgumentException"></exception>
-		public static ILunyGameObject ToLunyObject(System.Object gameObject)
+		public static LunyGameObject ToLunyObject(System.Object gameObject)
 		{
 			if (gameObject is not GameObject go)
 				throw new ArgumentException($"[{nameof(UnityGameObject)}] {nameof(ToLunyObject)}: {gameObject} must be a GameObject instance");
@@ -48,7 +48,7 @@ namespace Luny.Unity.Bridge
 			return new UnityGameObject(go, instanceId);
 		}
 
-		internal static ILunyGameObject FindNativeObject(String name)
+		internal static LunyGameObject FindNativeObject(String name)
 		{
 			var foundObject = GameObject.Find(name);
 			if (foundObject == null)
@@ -60,7 +60,7 @@ namespace Luny.Unity.Bridge
 			return ToLunyObject(foundObject);
 		}
 
-		internal static ILunyGameObject FindNativeChildObject(ILunyGameObject parent, String name)
+		internal static LunyGameObject FindNativeChildObject(LunyGameObject parent, String name)
 		{
 			var parentTransform = parent?.Transform?.Cast<Transform>();
 			if (parentTransform == null)
@@ -114,9 +114,9 @@ namespace Luny.Unity.Bridge
 			: base(gameObject, instanceId, ((GameObject)gameObject).activeSelf, IsNativeObjectVisible((GameObject)gameObject)) =>
 			Name = ((GameObject)gameObject).name;
 
-		public override ILunyGameObject Clone() => ToLunyObject(Object.Instantiate(GO));
+		public override LunyGameObject Clone() => ToLunyObject(Object.Instantiate(GO));
 
-		public override ILunyGameObject Clone(LunyTransform parent) => ToLunyObject(Object.Instantiate(GO, parent.Cast<Transform>()));
+		public override LunyGameObject Clone(LunyTransform parent) => ToLunyObject(Object.Instantiate(GO, parent.Cast<Transform>()));
 
 		private Renderer GetNativeRenderer()
 		{

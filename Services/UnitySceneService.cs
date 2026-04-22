@@ -16,14 +16,14 @@ namespace Luny.Unity.Services
 	{
 		public override void ReloadScene() => SceneManager.LoadScene(CurrentScene?.Name);
 
-		public override IReadOnlyList<ILunyGameObject> GetObjects(IReadOnlyCollection<String> objectNames)
+		public override IReadOnlyList<LunyGameObject> GetObjects(IReadOnlyCollection<String> objectNames)
 		{
 			if (objectNames == null || objectNames.Count == 0)
-				return Array.Empty<ILunyGameObject>();
+				return Array.Empty<LunyGameObject>();
 
 			var scene = SceneManager.GetActiveScene();
 			var rootGameObjects = scene.GetRootGameObjects();
-			var foundObjects = new List<ILunyGameObject>();
+			var foundObjects = new List<LunyGameObject>();
 
 			foreach (var rootObj in rootGameObjects)
 			{
@@ -49,7 +49,7 @@ namespace Luny.Unity.Services
 			return foundObjects.AsReadOnly();
 		}
 
-		public override ILunyGameObject FindObjectByName(String name)
+		public override LunyGameObject FindObjectByName(String name)
 		{
 			if (String.IsNullOrEmpty(name))
 				return null;
@@ -57,7 +57,7 @@ namespace Luny.Unity.Services
 			return UnityGameObject.FindNativeObject(name);
 		}
 
-		public override ILunyGameObject FindChildByName(ILunyGameObject parent, String name)
+		public override LunyGameObject FindChildByName(LunyGameObject parent, String name)
 		{
 			if (parent == null || String.IsNullOrEmpty(name))
 				return null;

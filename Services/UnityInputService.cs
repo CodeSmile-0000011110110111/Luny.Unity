@@ -231,7 +231,7 @@ namespace Luny.Unity.Services
 			}
 		}
 
-		public override void AssignUserToLastDevice(String userName, Int32 deviceId, ILunyGameObject lunyGameObject)
+		public override void AssignUserToLastDevice(String userName, Int32 deviceId, LunyGameObject lunyGameObject)
 		{
 			if (_lastUsedDevice == null)
 			{
@@ -242,7 +242,7 @@ namespace Luny.Unity.Services
 			AssignUserToDevice(userName, _lastUsedDevice, lunyGameObject);
 		}
 
-		private void AssignUserToDevice(String userName, InputDevice device, ILunyGameObject lunyGameObject)
+		private void AssignUserToDevice(String userName, InputDevice device, LunyGameObject lunyGameObject)
 		{
 			if (TryGetPairedUser(device, out var pairedUser) && pairedUser.Value.id != HostProfile.UserId)
 			{

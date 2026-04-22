@@ -33,7 +33,7 @@ namespace Luny.Unity.Bridge
 			var _ => throw new ArgumentOutOfRangeException(nameof(forceMode), $"unhandled ForceMode: {forceMode}"),
 		};
 
-		internal UnityRigidbody(ILunyGameObject owner, Rigidbody rigidbody)
+		internal UnityRigidbody(LunyGameObject owner, Rigidbody rigidbody)
 			: base(owner) => _rigidbody = rigidbody;
 
 		public override void MovePosition(LunyVector3 delta, LunyTransformSpace space)

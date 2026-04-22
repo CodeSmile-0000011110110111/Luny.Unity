@@ -21,7 +21,7 @@ namespace Luny.Unity.Bridge
 			go.SetActive(true);
 		}
 
-		public override T Instantiate<T>(ILunyGameObject parent)
+		public override T Instantiate<T>(LunyGameObject parent)
 		{
 			var unityPrefab = Cast<GameObject>();
 			var instance = parent != null && parent.IsValid
@@ -48,6 +48,6 @@ namespace Luny.Unity.Bridge
 		}
 
 		public GameObject Instantiate() => Instantiate<GameObject>(null);
-		public GameObject Instantiate(ILunyGameObject parent) => Instantiate<GameObject>(parent);
+		public GameObject Instantiate(LunyGameObject parent) => Instantiate<GameObject>(parent);
 	}
 }

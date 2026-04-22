@@ -8,7 +8,7 @@ namespace Luny.Unity.Services
 {
 	public sealed class UnityObjectService : LunyObjectServiceBase, ILunyObjectService
 	{
-		private static void ApplyProperties(GameObject go, ILunyGameObject parent, LunyVector3? position, LunyQuaternion? rotation,
+		private static void ApplyProperties(GameObject go, LunyGameObject parent, LunyVector3? position, LunyQuaternion? rotation,
 			LunyVector3? scale)
 		{
 			var transform = go.transform;
@@ -54,7 +54,7 @@ namespace Luny.Unity.Services
 			//                    $"rot:{transform.localRotation.eulerAngles}, scale:{transform.localScale}", go);
 		}
 
-		public override ILunyGameObject CreatePrimitive(String name, LunyPrimitiveType type, ILunyGameObject parent, LunyVector3? position,
+		public override LunyGameObject CreatePrimitive(String name, LunyPrimitiveType type, LunyGameObject parent, LunyVector3? position,
 			LunyQuaternion? rotation, LunyVector3? scale)
 		{
 			var go = GameObject.CreatePrimitive(type switch
@@ -72,7 +72,7 @@ namespace Luny.Unity.Services
 			return UnityGameObject.ToLunyObject(go);
 		}
 
-		public override ILunyGameObject CreateFromPrefab(ILunyPrefab prefab, ILunyGameObject parent, LunyVector3? position, LunyQuaternion? rotation,
+		public override LunyGameObject CreateFromPrefab(ILunyPrefab prefab, LunyGameObject parent, LunyVector3? position, LunyQuaternion? rotation,
 			LunyVector3? scale)
 		{
 			if (prefab is not UnityPrefab unityPrefab)
@@ -86,7 +86,7 @@ namespace Luny.Unity.Services
 			return UnityGameObject.ToLunyObject(go);
 		}
 
-		public override ILunyGameObject Clone(ILunyGameObject original, ILunyGameObject parent, LunyVector3? position, LunyQuaternion? rotation,
+		public override LunyGameObject Clone(LunyGameObject original, LunyGameObject parent, LunyVector3? position, LunyQuaternion? rotation,
 			LunyVector3? scale)
 		{
 			var go = original?.Clone(parent?.Transform);
@@ -94,7 +94,7 @@ namespace Luny.Unity.Services
 			return go;
 		}
 
-		public override ILunyGameObject CreateEmpty(String name, ILunyGameObject parent, LunyVector3? position, LunyQuaternion? rotation,
+		public override LunyGameObject CreateEmpty(String name, LunyGameObject parent, LunyVector3? position, LunyQuaternion? rotation,
 			LunyVector3? scale)
 		{
 			var go = new GameObject(name);
