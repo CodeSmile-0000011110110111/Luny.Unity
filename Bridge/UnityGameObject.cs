@@ -36,10 +36,10 @@ namespace Luny.Unity.Bridge
 		/// <param name="gameObject">A valid GameObject instance. The parameter is System.Object on purpose: Unity Console message double-click will not open the topmost line of the callstack otherwise for some reason.</param>
 		/// <returns></returns>
 		/// <exception cref="ArgumentException"></exception>
-		public static LunyGameObject ToLunyObject(System.Object gameObject)
+		public static LunyGameObject ToLuny(System.Object gameObject)
 		{
 			if (gameObject is not GameObject go)
-				throw new ArgumentException($"[{nameof(UnityGameObject)}] {nameof(ToLunyObject)}: {gameObject} must be a GameObject instance");
+				throw new ArgumentException($"[{nameof(UnityGameObject)}] {nameof(ToLuny)}: {gameObject} must be a GameObject instance");
 
 			var instanceId = go.GetEntityId();
 			if (TryGetCached(instanceId, out var lunyObject))
@@ -57,7 +57,7 @@ namespace Luny.Unity.Bridge
 			if (foundObject == null)
 				return null;
 
-			return ToLunyObject(foundObject);
+			return ToLuny(foundObject);
 		}
 
 		internal static LunyGameObject FindNativeChildObject(LunyGameObject parent, String name)
@@ -70,7 +70,7 @@ namespace Luny.Unity.Bridge
 			if (found == null || found == parentTransform)
 				return null;
 
-			return ToLunyObject(found.gameObject);
+			return ToLuny(found.gameObject);
 		}
 
 		private static GameObject FindInactive(String name)
@@ -114,9 +114,9 @@ namespace Luny.Unity.Bridge
 			: base(gameObject, instanceId, ((GameObject)gameObject).activeSelf, IsNativeObjectVisible((GameObject)gameObject)) =>
 			Name = ((GameObject)gameObject).name;
 
-		public override LunyGameObject Clone() => ToLunyObject(Object.Instantiate(GO));
+		public override LunyGameObject Clone() => ToLuny(Object.Instantiate(GO));
 
-		public override LunyGameObject Clone(LunyTransform parent) => ToLunyObject(Object.Instantiate(GO, parent.Cast<Transform>()));
+		public override LunyGameObject Clone(LunyTransform parent) => ToLuny(Object.Instantiate(GO, parent.Cast<Transform>()));
 
 		private Renderer GetNativeRenderer()
 		{

@@ -29,7 +29,7 @@ namespace Luny.Unity.Services
 			{
 				if (objectNames.Contains(rootObj.name))
 				{
-					var lunyObject = UnityGameObject.ToLunyObject(rootObj);
+					var lunyObject = UnityGameObject.ToLuny(rootObj);
 					foundObjects.Add(lunyObject);
 				}
 
@@ -42,7 +42,7 @@ namespace Luny.Unity.Services
 						continue;
 
 					if (objectNames.Contains(transform.name))
-						foundObjects.Add(UnityGameObject.ToLunyObject(go));
+						foundObjects.Add(UnityGameObject.ToLuny(go));
 				}
 			}
 

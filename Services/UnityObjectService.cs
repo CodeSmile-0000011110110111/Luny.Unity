@@ -69,7 +69,7 @@ namespace Luny.Unity.Services
 			});
 			go.name = name;
 			ApplyProperties(go, parent, position, rotation, scale);
-			return UnityGameObject.ToLunyObject(go);
+			return UnityGameObject.ToLuny(go);
 		}
 
 		public override LunyGameObject CreateFromPrefab(ILunyPrefab prefab, LunyGameObject parent, LunyVector3? position, LunyQuaternion? rotation,
@@ -83,7 +83,7 @@ namespace Luny.Unity.Services
 			var go = unityPrefab.Instantiate(parent?.Transform?.Cast<Transform>(), pos, rot);
 			if (scale.HasValue)
 				go.transform.localScale = scale.Value.ToUnity();
-			return UnityGameObject.ToLunyObject(go);
+			return UnityGameObject.ToLuny(go);
 		}
 
 		public override LunyGameObject Clone(LunyGameObject original, LunyGameObject parent, LunyVector3? position, LunyQuaternion? rotation,
@@ -99,7 +99,7 @@ namespace Luny.Unity.Services
 		{
 			var go = new GameObject(name);
 			ApplyProperties(go, parent, position, rotation, scale);
-			return UnityGameObject.ToLunyObject(go);
+			return UnityGameObject.ToLuny(go);
 		}
 	}
 }
