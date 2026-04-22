@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Luny.Unity.Bridge
 {
-	public static class LunyVectorExt
+	public static class LunyTypeExtensions
 	{
 		public static Vector3 ToUnity(this LunyVector3 v) => new(v.X, v.Y, v.Z);
 		public static LunyVector3 ToLuny(this Vector3 v) => new(v.x, v.y, v.z);
